@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
         const { title } = req.body
         if (!title?.trim()) {
             res.status(400).json({ messgae: '内容不能为空' })
+            return
         }
 
         const todo = new Todo({ user: req.userId, title: title.trim() })
