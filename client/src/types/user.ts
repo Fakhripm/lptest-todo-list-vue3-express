@@ -3,7 +3,7 @@ export interface User {
   username: String
 }
 
-export interface LoginParmas {
+export interface LoginParams {
   username: string
   password: string
 }
