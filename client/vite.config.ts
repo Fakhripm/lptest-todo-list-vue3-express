@@ -11,7 +11,6 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
     AutoImport({
       // 自动导入 Element Plus 的API
       resolvers: [ElementPlusResolver()],
