@@ -1,6 +1,6 @@
 /**
  * Todo 相关接口
- * 增删改查，全部需要登录（Token 在拦截器自动附加）
+ * 增删改查（Token 在拦截器中自动附加）
  */
 import api from './index'
 import type { Todo, CreateTodoParams } from '@/types/todo'
@@ -20,10 +20,10 @@ export function deleteTodo(id: string): Promise<{ message: string }> {
   return api.delete(`/todos/${id}`)
 }
 
-//更新Todo
+// 更新Todo
 export function updateTodo(
   id: string,
   params: Partial<CreateTodoParams> & { completed?: boolean },
 ): Promise<Todo> {
-  return api.put(`/todos/&{id}`, params)
+  return api.put(`/todos/${id}`, params)
 }
