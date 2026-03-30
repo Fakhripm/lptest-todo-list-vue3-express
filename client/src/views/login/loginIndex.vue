@@ -13,14 +13,9 @@
           <p class="brand-subtitle">简约日程，让生活呼吸顺畅</p>
         </div>
 
-        <el-form class="login-form" ref="formRef">
+        <el-form>
           <el-form-item>
-            <el-input
-              placeholder="请输入邮箱 / 用户名"
-              size="large"
-              class="custom-input"
-              clearable
-            />
+            <el-input placeholder="请输入用户名" size="large" class="custom-input" clearable />
           </el-form-item>
 
           <el-form-item>
@@ -75,7 +70,6 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  // 线条透明度调至 0.03，确保若隐若现不显脏
   background-image:
     linear-gradient(rgba($text-main, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba($text-main, 0.03) 1px, transparent 1px);
@@ -88,7 +82,6 @@
   max-width: 400px;
   border-radius: $radius-card;
   border: none;
-  // 使用更细腻的软阴影
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
   position: relative;
   z-index: 1;
@@ -122,7 +115,7 @@
         border-bottom-color: rgba($primary-color, 0.1);
         border-left-color: rgba($primary-color, 0.6);
         border-radius: 50%;
-        animation: rotate-ring 6s linear infinite; // 减缓速度，更显沉稳
+        animation: rotate-ring 6s linear infinite;
       }
 
       .circle-core {
@@ -141,10 +134,10 @@
 
     .brand-title {
       font-size: 32px;
-      font-weight: 850; // 增强字重
+      font-weight: 850;
       color: $text-main;
       margin: 0;
-      letter-spacing: -1.5px; // 紧缩字间距，提升设计感
+      letter-spacing: -1.5px;
     }
 
     .brand-subtitle {
@@ -171,9 +164,10 @@
     @include active-push;
 
     &:hover {
-      background-color: #222;
+      /* 修复 Deprecation Warning：将 darken 改为 color.adjust */
+      background-color: color.adjust($text-main, $lightness: -12%);
       box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.4);
-      transform: translateY(-2px); // 悬停微浮起
+      transform: translateY(-2px);
     }
   }
 
