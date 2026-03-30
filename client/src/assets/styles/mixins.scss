@@ -1,0 +1,16 @@
+// mixins.scss
+
+// 快速 Flex 居中
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// 按钮微交互动画
+@mixin active-push {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  &:active {
+    transform: scale(0.96);
+  }
+}
