@@ -1,6 +1,4 @@
 /* global.scss */
-// 注意：使用 @use 引入变量时，变量需要通过 文件名.变量名 使用
-// 但因为我们在 vite 配置里注入了，这里可以简单点，只放全局基础样式
 @use './variables.scss' as vars;
 @use './mixins.scss' as mix;
 
@@ -15,7 +13,7 @@ body,
 #app {
   height: 100%;
   width: 100%;
-  background-color: vars.$bg-color; // 这里的 vars 对应上面 as 的别名
+  background-color: vars.$bg-color;
   -webkit-font-smoothing: antialiased;
   font-family: 'SF Pro Display', 'PingFang SC', sans-serif;
 }
