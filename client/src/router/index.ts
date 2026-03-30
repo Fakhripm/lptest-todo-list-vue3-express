@@ -11,23 +11,22 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const userStore = useUserStore()
   const requiresAuth = !to.meta.public
 
   if (userStore.isLoggedIn) {
     if (to.path === '/login') {
-      next('/todo')
-    } else {
-      next()
+      return '/todo'
     }
-  } else {
-    if (requiresAuth) {
-      next('/login')
-    } else {
-      next()
-    }
+    return true
   }
+
+  if (requiresAuth) {
+    return '/login'
+  }
+
+  return true
 })
 
 router.afterEach((to) => {

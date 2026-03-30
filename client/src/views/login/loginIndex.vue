@@ -37,7 +37,7 @@
 
         <div class="footer-section">
           <span class="hint-text">还没有加入？</span>
-          <el-link :underline="false" class="register-link">立即注册</el-link>
+          <el-link underline="never" class="register-link">立即注册</el-link>
         </div>
       </div>
     </el-card>
@@ -47,8 +47,6 @@
 <script setup lang="ts"></script>
 
 <style lang="scss" scoped>
-/* 注意：这里不要再写 @import 或 @use 变量文件了，因为你在 vite.config 里已经自动注入了 */
-/* 我们只需在这里引入 Sass 自带的 color 模块来处理颜色函数 */
 @use 'sass:color';
 
 .login-wrapper {
@@ -155,7 +153,6 @@
     @include active-push;
 
     &:hover {
-      // 修正：使用 color.adjust 替代 lighten
       background-color: color.adjust($text-main, $lightness: 10%);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
@@ -188,7 +185,6 @@
 }
 
 :deep(.el-input__wrapper) {
-  // 修正：使用 color.adjust 替代 darken
   background-color: color.adjust($bg-color, $lightness: -2%) !important;
   box-shadow: none !important;
   border-radius: $radius-input;
