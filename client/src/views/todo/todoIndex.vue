@@ -12,7 +12,7 @@
             <span class="welcome-text">你好, 执行者</span>
             <div class="date-group">
               <el-icon class="calendar-mini"><Calendar /></el-icon>
-              <span class="date-text">2026年4月1日 · 星期三</span>
+              <span class="date-text">2023年10月27日 · 星期五</span>
             </div>
           </div>
         </div>
@@ -28,7 +28,7 @@
           <h2 class="page-title">今日清单</h2>
           <div class="status-badge-wrapper">
             <div class="status-badge">
-              <span class="count">3</span>
+              <span class="count">1</span>
               <span class="label">条待办</span>
             </div>
           </div>
@@ -39,12 +39,7 @@
             <div class="plus-icon-container">
               <el-icon :size="20" class="rotating-plus"><Plus /></el-icon>
             </div>
-            <input
-              type="text"
-              placeholder="记录新灵感 (最多100字)..."
-              class="pure-input"
-              maxlength="100"
-            />
+            <input type="text" placeholder="记录新灵感 (最多100字)..." class="pure-input" />
             <div class="input-tip">ENTER</div>
           </div>
         </section>
@@ -54,7 +49,7 @@
             <div class="item-checkbox-wrapper">
               <div class="item-checkbox"></div>
             </div>
-            <div class="item-text">完成 API 接口联调与功能对齐</div>
+            <div class="item-text">深度思考：重构系统组件架构</div>
             <div class="item-actions">
               <el-button link :icon="Edit" class="action-btn edit"></el-button>
               <el-button link :icon="Delete" class="action-btn delete"></el-button>
@@ -64,10 +59,23 @@
           <div class="todo-item is-completed">
             <div class="item-checkbox-wrapper">
               <div class="item-checkbox">
-                <el-icon class="check-mark" :size="12"><Check /></el-icon>
+                <el-icon class="check-mark" :size="14"><Check /></el-icon>
               </div>
             </div>
-            <div class="item-text">用户认证模块 (登录/注册) 开发</div>
+            <div class="item-text">视觉方案评审 - 极致极简版</div>
+            <div class="item-actions">
+              <el-button link :icon="Edit" class="action-btn edit"></el-button>
+              <el-button link :icon="Delete" class="action-btn delete"></el-button>
+            </div>
+          </div>
+
+          <div class="todo-item is-completed">
+            <div class="item-checkbox-wrapper">
+              <div class="item-checkbox">
+                <el-icon class="check-mark" :size="14"><Check /></el-icon>
+              </div>
+            </div>
+            <div class="item-text">完成 API 文档编写</div>
             <div class="item-actions">
               <el-button link :icon="Edit" class="action-btn edit"></el-button>
               <el-button link :icon="Delete" class="action-btn delete"></el-button>
@@ -80,7 +88,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 仅保留图标导入，去除所有业务逻辑，方便纯样式练习
+ */
 import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-vue'
+import 'element-plus/dist/index.css'
 </script>
 
 <style lang="scss" scoped>
@@ -95,7 +107,10 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
   display: flex;
   justify-content: center;
   overflow-x: hidden;
-  font-family: 'SF Pro Display', sans-serif;
+  font-family:
+    'SF Pro Display',
+    -apple-system,
+    sans-serif;
 }
 
 .grid-overlay {
@@ -117,7 +132,6 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
   z-index: 1;
 }
 
-/* 十、九、头部与头像优化 */
 .todo-header {
   display: flex;
   justify-content: space-between;
@@ -128,20 +142,19 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
     display: flex;
     align-items: center;
     gap: 16px;
-    cursor: pointer;
 
     .avatar-box {
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       background: white;
-      border-radius: vars.$radius-base;
+      border-radius: 50%;
       border: 1px solid rgba(0, 0, 0, 0.05);
       @include mix.flex-center;
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
       .avatar-inner {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
         background: vars.$text-main;
         border-radius: 50%;
       }
@@ -163,7 +176,6 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-top: 2px;
         .calendar-mini {
           font-size: 12px;
           color: vars.$primary-color;
@@ -180,10 +192,6 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
   .logout-btn {
     @include mix.active-push;
     padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
     .logout-text {
       font-size: 13px;
       color: vars.$text-gray;
@@ -197,7 +205,6 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       transform: translateX(-5px);
       transition: all 0.3s;
     }
-
     &:hover {
       .logout-text {
         color: vars.$danger-color;
@@ -212,21 +219,8 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
   }
 }
 
-/* 四、状态徽章动画 */
-@keyframes badge-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .status-badge-wrapper {
   animation: badge-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 0.2s;
 }
 
 .todo-content {
@@ -246,7 +240,7 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 6px 14px;
+      padding: 6px 16px;
       background: white;
       border-radius: 30px;
       border: 1px solid rgba(0, 0, 0, 0.05);
@@ -263,11 +257,10 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
     }
   }
 
-  /* 三、八、输入框动画与规范 */
   .fancy-input-wrapper {
     background: vars.$card-bg;
-    padding: 18px 24px;
-    border-radius: vars.$radius-card;
+    padding: 18px 26px;
+    border-radius: 30px;
     box-shadow: vars.$shadow-soft;
     display: flex;
     align-items: center;
@@ -277,8 +270,8 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
     &:focus-within {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
       .rotating-plus {
         transform: rotate(90deg);
         color: vars.$primary-color;
@@ -301,6 +294,7 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       font-size: 16px;
       font-weight: 600;
       color: vars.$text-main;
+      background: transparent;
       &::placeholder {
         color: vars.$text-gray;
         opacity: 0.45;
@@ -314,26 +308,24 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       opacity: 0.3;
       padding: 4px 10px;
       border: 1.5px solid rgba(vars.$text-gray, 0.15);
-      border-radius: 10px;
+      border-radius: 12px;
     }
   }
 
-  /* 一、二、五、六、任务列表优化 */
   .todo-item {
     display: flex;
     align-items: center;
-    padding: 22px 26px;
-    background: rgba(vars.$card-bg, 0.8);
+    padding: 22px 30px;
+    background: rgba(vars.$card-bg, 0.85);
     backdrop-filter: blur(12px);
-    border-radius: vars.$radius-base;
+    border-radius: 24px;
     margin-bottom: 16px;
-    border: 1px solid transparent;
-    border-left: 5px solid transparent;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); // 五、优化滑动顺滑度
+    border: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     &:hover {
       background: vars.$card-bg;
-      transform: translateX(8px); // 移除 scale 避免抖动，仅保留位移
+      transform: translateX(8px);
       box-shadow: vars.$shadow-soft;
       .item-actions {
         opacity: 1;
@@ -343,20 +335,14 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
 
     .item-checkbox-wrapper {
       margin-right: 22px;
+      cursor: pointer;
       .item-checkbox {
-        width: 24px;
-        height: 24px;
-        border: 2.5px solid vars.$border-color;
-        border-radius: 8px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
         background: white;
-        transition: all 0.3s;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         @include mix.flex-center;
-
-        &:hover {
-          transform: scale(1.15); // 一、复选框缩放
-          border-color: vars.$primary-color;
-          background: rgba(vars.$primary-color, 0.05);
-        }
       }
     }
 
@@ -365,7 +351,7 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       font-size: 16px;
       font-weight: 600;
       color: vars.$text-main;
-      transition: all 0.3s;
+      transition: color 0.3s ease;
     }
 
     .item-actions {
@@ -375,11 +361,11 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       transform: translateX(10px);
       transition: all 0.3s;
       .action-btn {
-        font-size: 19px;
-        transition: all 0.2s;
+        font-size: 20px;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         &:hover {
-          transform: scale(1.2);
-        } // 六、按钮缩放
+          transform: scale(1.2) translateY(-2px);
+        }
         &.edit {
           color: vars.$text-gray;
           &:hover {
@@ -395,29 +381,77 @@ import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-
       }
     }
 
+    /* 待办状态：主色描边，白底 */
     &.is-pending {
-      border-left-color: vars.$primary-color;
-    }
-
-    &.is-completed {
-      opacity: 0.5;
-      border-left-color: rgba(vars.$text-gray, 0.2);
       .item-checkbox {
-        // 二、已完成勾选框视觉降权
-        background: rgba(vars.$text-gray, 0.1);
-        border-color: transparent;
-        .check-mark {
-          color: vars.$text-gray;
+        border: 2.5px solid vars.$primary-color;
+        &:hover {
+          transform: scale(1.15);
+          border-color: darken(#409eff, 10%);
+          background: rgba(vars.$primary-color, 0.02);
         }
       }
+    }
+
+    /* 已完成状态：灰色填充，灰色描边，带对勾 */
+    &.is-completed {
+      opacity: 0.55;
       .item-text {
         text-decoration: line-through;
         color: vars.$text-gray;
+      }
+      .item-checkbox {
+        background: #e0e0e0;
+        border: 2.5px solid #d0d0d0;
+        .check-mark {
+          color: white;
+        }
       }
       &:hover {
         transform: none;
       }
     }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    .empty-icon-wrapper {
+      display: inline-block;
+      margin-bottom: 20px;
+      animation: floating 3s ease-in-out infinite;
+      .empty-icon {
+        color: vars.$text-gray;
+        opacity: 0.3;
+      }
+    }
+    .empty-text {
+      font-size: 14px;
+      color: vars.$text-gray;
+      font-weight: 600;
+      opacity: 0.5;
+    }
+  }
+}
+
+@keyframes badge-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 </style>
