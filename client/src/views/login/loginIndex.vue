@@ -13,13 +13,20 @@
           <p class="brand-subtitle">简约日程，让生活呼吸顺畅</p>
         </div>
 
-        <el-form>
-          <el-form-item>
-            <el-input placeholder="请输入用户名" size="large" class="custom-input" clearable />
+        <el-form ref="formRef" :rules="rules" :model="form" @keyup.enter="handleLogin">
+          <el-form-item prop="username">
+            <el-input
+              v-model="form.username"
+              placeholder="请输入用户名"
+              size="large"
+              class="custom-input"
+              clearable
+            />
           </el-form-item>
 
-          <el-form-item>
+          <el-form-item prop="password">
             <el-input
+              v-model="form.password"
               type="password"
               placeholder="请输入密码"
               show-password
@@ -30,7 +37,9 @@
           </el-form-item>
 
           <el-form-item class="submit-item">
-            <el-button type="primary" class="submit-btn"> 开始今日清单 </el-button>
+            <el-button type="primary" class="submit-btn" @click="handleLogin" :loading="loading">
+              开始今日清单
+            </el-button>
           </el-form-item>
         </el-form>
 
@@ -44,15 +53,61 @@
 </template>
 
 <script setup lang="ts">
-/**
- * 此时暂无 Script 逻辑
- * 后续可在此处添加 handleLogin 异步请求
- */
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { ElMessage } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+
+const router = useRouter()
+const userStore = useUserStore()
+
+const formRef = ref<FormInstance>()
+const loading = ref(false)
+const form = reactive({
+  username: '',
+  password: '',
+})
+
+const rules: FormRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, message: '用户名至少三位', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码至少六位', trigger: 'blur' },
+  ],
+}
+
+// 4. 登录逻辑
+const handleLogin = async () => {
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) return
+
+  loading.value = true
+
+  try {
+    await userStore.login({
+      username: form.username,
+      password: form.password,
+    })
+
+    ElMessage.success('欢迎回来!')
+    router.push('/todo')
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : '登录失败了, 请检查账号密码'
+    ElMessage.error(errorMessage)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 @use 'sass:color';
 
+// 基础容器
 .login-wrapper {
   height: 100vh;
   width: 100vw;
@@ -64,7 +119,7 @@
   overflow: hidden;
 }
 
-/* 极简网格线：提供秩序感与清单感 */
+// 网格背景
 .grid-overlay {
   position: absolute;
   inset: 0;
@@ -77,6 +132,7 @@
   background-position: center center;
 }
 
+// 卡片样式
 .login-card {
   width: 90%;
   max-width: 400px;
@@ -115,7 +171,7 @@
         border-bottom-color: rgba($primary-color, 0.1);
         border-left-color: rgba($primary-color, 0.6);
         border-radius: 50%;
-        animation: rotate-ring 6s linear infinite;
+        animation: rotating 6s linear infinite; // 使用统一的 rotating 动画
       }
 
       .circle-core {
@@ -160,14 +216,27 @@
     border-radius: $radius-base;
     font-size: 16px;
     font-weight: 600;
+    color: #fff;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     @include active-push;
 
     &:hover {
-      /* 修复 Deprecation Warning：将 darken 改为 color.adjust */
       background-color: color.adjust($text-main, $lightness: -12%);
       box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.4);
       transform: translateY(-2px);
+    }
+
+    &.is-loading {
+      opacity: 0.7;
+      background-color: $text-main !important;
+      cursor: not-allowed;
+      transform: translateY(0);
+
+      :deep(.el-icon) {
+        font-size: 20px;
+        color: rgba(255, 255, 255, 0.9);
+        animation: rotating 1.5s linear infinite;
+      }
     }
   }
 
@@ -192,7 +261,7 @@
   }
 }
 
-@keyframes rotate-ring {
+@keyframes rotating {
   from {
     transform: rotate(0deg);
   }
