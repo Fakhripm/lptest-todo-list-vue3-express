@@ -9,15 +9,15 @@
             <div class="avatar-inner"></div>
           </div>
           <div class="user-info">
-            <span class="welcome-text">你好, 执行者</span>
+            <span class="welcome-text">你好, {{ userStore.user?.username || 'emo' }}</span>
             <div class="date-group">
               <el-icon class="calendar-mini"><Calendar /></el-icon>
-              <span class="date-text">2023年10月27日 · 星期五</span>
+              <span class="date-text">{{ currentDate }}</span>
             </div>
           </div>
         </div>
 
-        <el-button link class="logout-btn">
+        <el-button link class="logout-btn" @click="handleLogout">
           <span class="logout-text">退出登录</span>
           <el-icon class="exit-icon"><Right /></el-icon>
         </el-button>
@@ -28,7 +28,7 @@
           <h2 class="page-title">今日清单</h2>
           <div class="status-badge-wrapper">
             <div class="status-badge">
-              <span class="count">1</span>
+              <span class="count">{{ todoStore.unfinishedCount }}</span>
               <span class="label">条待办</span>
             </div>
           </div>
@@ -36,50 +36,56 @@
 
         <section class="input-section">
           <div class="fancy-input-wrapper">
-            <div class="plus-icon-container">
-              <el-icon :size="20" class="rotating-plus"><Plus /></el-icon>
+            <div class="plus-icon-container" @click="handleAddTodo">
+              <el-icon :size="20" class="rotating-plus" v-loading="isSubmitting"><Plus /></el-icon>
             </div>
-            <input type="text" placeholder="记录新灵感 (最多100字)..." class="pure-input" />
+            <input
+              type="text"
+              v-model="newTodoTitle"
+              @keydown="handleKeydown"
+              placeholder="记录新灵感 (最多100字)..."
+              class="pure-input"
+              maxlength="100"
+              :disabled="isSubmitting"
+            />
             <div class="input-tip">ENTER</div>
           </div>
         </section>
 
         <section class="list-section">
-          <div class="todo-item is-pending">
-            <div class="item-checkbox-wrapper">
-              <div class="item-checkbox"></div>
-            </div>
-            <div class="item-text">深度思考：重构系统组件架构</div>
-            <div class="item-actions">
-              <el-button link :icon="Edit" class="action-btn edit"></el-button>
-              <el-button link :icon="Delete" class="action-btn delete"></el-button>
-            </div>
-          </div>
-
-          <div class="todo-item is-completed">
-            <div class="item-checkbox-wrapper">
+          <div
+            v-for="todo in todoStore.todos"
+            :key="todo._id"
+            class="todo-item"
+            :class="{
+              'is-pending': !todo.completed,
+              'is-completed': todo.completed,
+            }"
+          >
+            <div class="item-checkbox-wrapper" @click="handleToggle(todo)">
               <div class="item-checkbox">
-                <el-icon class="check-mark" :size="14"><Check /></el-icon>
+                <el-icon v-if="todo.completed" class="check-mark" :size="14">
+                  <Check />
+                </el-icon>
               </div>
             </div>
-            <div class="item-text">视觉方案评审 - 极致极简版</div>
+
+            <div class="item-text">{{ todo.title }}</div>
             <div class="item-actions">
               <el-button link :icon="Edit" class="action-btn edit"></el-button>
-              <el-button link :icon="Delete" class="action-btn delete"></el-button>
+              <el-button
+                link
+                :icon="Delete"
+                class="action-btn delete"
+                @click.stop="handleDelete(todo)"
+              ></el-button>
             </div>
           </div>
-
-          <div class="todo-item is-completed">
-            <div class="item-checkbox-wrapper">
-              <div class="item-checkbox">
-                <el-icon class="check-mark" :size="14"><Check /></el-icon>
-              </div>
+          <div v-if="todoStore.todos.length === 0 && !todoStore.loading" class="empty-state">
+            <div class="empty-icon-wrapper">
+              <el-icon :size="54" class="empty-icon"><Edit /></el-icon>
             </div>
-            <div class="item-text">完成 API 文档编写</div>
-            <div class="item-actions">
-              <el-button link :icon="Edit" class="action-btn edit"></el-button>
-              <el-button link :icon="Delete" class="action-btn delete"></el-button>
-            </div>
+            <p class="empty-text">今日暂无待办，开始你的第一条灵感吧</p>
           </div>
         </section>
       </main>
@@ -88,11 +94,114 @@
 </template>
 
 <script setup lang="ts">
-/**
- * 仅保留图标导入，去除所有业务逻辑，方便纯样式练习
- */
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useTodoStore } from '@/stores/todo'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
+import type { Todo } from '@/types/todo'
+
+const router = useRouter()
+const todoStore = useTodoStore()
+const userStore = useUserStore()
+
+// 输入框临时存放点
+const newTodoTitle = ref<string>('')
+const isSubmitting = ref(false)
+
+// 显示当前日期
+const currentDate = computed(() => {
+  const now = new Date()
+  const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  // 拼接字符串
+  return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${weekdays[now.getDay()]}`
+})
+
+// 辅助函数：安全提取错误信息
+function getErrorMessage(error: unknown, defaultMsg: string): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+  if (typeof error === 'string') {
+    return error
+  }
+  return defaultMsg
+}
+// 添加任务
+async function handleAddTodo() {
+  const title = newTodoTitle.value.trim()
+  if (!title) {
+    ElMessage.warning('请输入任务内容')
+    return
+  }
+  if (isSubmitting.value) return
+
+  try {
+    isSubmitting.value = true
+    await todoStore.addTodo(title)
+    newTodoTitle.value = ''
+    ElMessage.success('添加成功')
+  } catch (error: unknown) {
+    const errorMsg = getErrorMessage(error, '添加失败')
+    ElMessage.error(errorMsg)
+  } finally {
+    isSubmitting.value = false
+  }
+}
+// 保险 用于监听键盘事件
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    handleAddTodo()
+  }
+}
+// 切换任务完成状态
+async function handleToggle(todo: Todo) {
+  try {
+    await todoStore.toggleTodo(todo._id)
+  } catch (error: unknown) {
+    const msg = getErrorMessage(error, '操作失败')
+    ElMessage.error(msg)
+  }
+}
+// 删除任务
+async function handleDelete(todo: Todo) {
+  try {
+    await ElMessageBox.confirm(`确定要删除任务 ${todo.title} 吗？`, '风险提示', {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '点错了',
+      type: 'warning',
+      customClass: 'modern-confirm-box',
+    })
+    await todoStore.removeTodo(todo._id)
+    ElMessage.success('已从清单中移除')
+  } catch (error: unknown) {
+    if (error !== 'cancel') {
+      ElMessage.error(getErrorMessage(error, '删除失败'))
+    }
+  }
+}
+//退出登录
+async function handleLogout() {
+  try {
+    await ElMessageBox.confirm('确定退出当前账号？', '提示', {
+      confirmButtonText: '退出',
+      cancelButtonText: '取消',
+      type: 'info',
+      customClass: 'modern-confirm-box',
+    })
+    userStore.logout()
+    router.push('/login')
+    ElMessage.success('已安全退出')
+  } catch {}
+}
+
+onMounted(() => {
+  todoStore.fetchTodos().catch((error: unknown) => {
+    ElMessage.error(getErrorMessage(error, '获取列表失败'))
+  })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -192,6 +301,7 @@ import 'element-plus/dist/index.css'
   .logout-btn {
     @include mix.active-push;
     padding: 8px 12px;
+    cursor: pointer;
     .logout-text {
       font-size: 13px;
       color: vars.$text-gray;
@@ -281,6 +391,7 @@ import 'element-plus/dist/index.css'
     .plus-icon-container {
       width: 24px;
       @include mix.flex-center;
+      cursor: pointer;
       .rotating-plus {
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         color: vars.$text-gray;
@@ -298,6 +409,10 @@ import 'element-plus/dist/index.css'
       &::placeholder {
         color: vars.$text-gray;
         opacity: 0.45;
+      }
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
     }
 
@@ -381,7 +496,6 @@ import 'element-plus/dist/index.css'
       }
     }
 
-    /* 待办状态：主色描边，白底 */
     &.is-pending {
       .item-checkbox {
         border: 2.5px solid vars.$primary-color;
@@ -393,7 +507,6 @@ import 'element-plus/dist/index.css'
       }
     }
 
-    /* 已完成状态：灰色填充，灰色描边，带对勾 */
     &.is-completed {
       opacity: 0.55;
       .item-text {
@@ -453,5 +566,70 @@ import 'element-plus/dist/index.css'
   50% {
     transform: translateY(-10px);
   }
+}
+</style>
+
+<style lang="scss">
+.modern-confirm-box {
+  --el-messagebox-width: 380px;
+  border-radius: 28px !important;
+  padding: 24px !important;
+  border: none !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15) !important;
+
+  .el-message-box__header {
+    .el-message-box__title {
+      font-weight: 850;
+      font-size: 20px;
+      color: #1d1d1f;
+      letter-spacing: -0.5px;
+    }
+  }
+
+  .el-message-box__content {
+    color: #424245;
+    font-size: 15px;
+    padding: 15px 0 25px;
+    line-height: 1.5;
+  }
+
+  .el-message-box__btns {
+    display: flex;
+    gap: 12px;
+    .el-button {
+      flex: 1;
+      height: 46px;
+      border-radius: 16px;
+      font-weight: 700;
+      margin-left: 0 !important;
+      &:first-child {
+        background: #f5f5f7;
+        border: none;
+        color: #86868b;
+        &:hover {
+          background: #e8e8ed;
+          color: #1d1d1f;
+        }
+      }
+      &:last-child {
+        background: #ff3b30;
+        border: none;
+        color: white;
+        &:hover {
+          background: #d70015;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 15px rgba(255, 59, 48, 0.25);
+        }
+      }
+    }
+  }
+}
+
+/* 覆盖底层遮罩，增加模糊感 */
+.el-overlay {
+  backdrop-filter: blur(8px) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
 }
 </style>
