@@ -227,6 +227,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+/* todoIndex.vue 完整样式表 - 拟物化文档图标 + 物理按键 ENTER 版 */
+
 .todo-wrapper {
   min-height: 100vh;
   width: 100vw;
@@ -260,6 +262,7 @@ onMounted(() => {
   z-index: 1;
 }
 
+/* --- 头部用户信息区域 (方案 A 拟物图标) --- */
 .todo-header {
   display: flex;
   justify-content: space-between;
@@ -270,40 +273,98 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 16px;
+    cursor: pointer;
 
-    .avatar-box {
-      width: 46px;
-      height: 46px;
-      background: white;
-      border-radius: 50%;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      @include flex-center;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
+    &:hover {
+      .avatar-box {
+        transform: scale(1.05) translateY(-2px);
+        background: white;
+        box-shadow: $shadow-mid;
+      }
       .avatar-inner {
-        width: 16px;
-        height: 16px;
-        background: $text-main;
-        border-radius: 50%;
+        background: $primary-color;
+        border-color: $primary-color;
+        transform: rotate(-3deg);
+        &::before {
+          background: white;
+          box-shadow:
+            0 5px 0 white,
+            0 10px 0 white;
+        }
+        &::after {
+          background: linear-gradient(135deg, white 50%, rgba(255, 255, 255, 0.4) 50%);
+          border-left-color: white;
+          border-bottom-color: white;
+        }
+      }
+      .welcome-text {
+        color: $primary-color;
       }
     }
 
-    &:hover .avatar-box {
-      transform: scale(1.1) rotate(5deg);
-      box-shadow: $shadow-soft;
+    .avatar-box {
+      width: 52px;
+      height: 52px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      @include flex-center;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .avatar-inner {
+      width: 22px;
+      height: 28px;
+      background: rgba($primary-color, 0.08);
+      border-radius: 3px;
+      border: 1.5px solid rgba($primary-color, 0.3);
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: -1.5px;
+        right: -1.5px;
+        width: 7px;
+        height: 7px;
+        background: linear-gradient(135deg, $bg-color 50%, rgba($primary-color, 0.2) 50%);
+        border-bottom-left-radius: 3px;
+        border-left: 1.5px solid rgba($primary-color, 0.3);
+        border-bottom: 1.5px solid rgba($primary-color, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 9px;
+        left: 4px;
+        width: 11px;
+        height: 2px;
+        background: rgba($primary-color, 0.4);
+        border-radius: 1px;
+        box-shadow:
+          0 5px 0 rgba($primary-color, 0.4),
+          0 10px 0 rgba($primary-color, 0.4);
+        transition: all 0.3s ease;
+      }
     }
 
     .user-info {
       .welcome-text {
-        font-weight: 800;
+        font-weight: 850;
         font-size: 17px;
         color: $text-main;
         display: block;
+        transition: color 0.3s;
+        letter-spacing: -0.5px;
       }
       .date-group {
         display: flex;
         align-items: center;
         gap: 6px;
+        margin-top: 2px;
         .calendar-mini {
           font-size: 12px;
           color: $primary-color;
@@ -311,7 +372,7 @@ onMounted(() => {
         .date-text {
           font-size: 12px;
           color: $text-gray;
-          font-weight: 500;
+          font-weight: 600;
         }
       }
     }
@@ -333,7 +394,6 @@ onMounted(() => {
       transform: translateX(-5px);
       transition: all 0.3s;
     }
-
     &:hover {
       .logout-text {
         color: $danger-color;
@@ -348,6 +408,7 @@ onMounted(() => {
   }
 }
 
+/* --- 内容主体与输入框优化 --- */
 .todo-content {
   .content-header {
     display: flex;
@@ -384,8 +445,8 @@ onMounted(() => {
 
   .fancy-input-wrapper {
     background: $card-bg;
-    padding: 18px 26px;
-    border-radius: 30px;
+    padding: 14px 22px; // 稍微收窄一点，更精致
+    border-radius: 20px; // 圆角微调
     box-shadow: $shadow-soft;
     display: flex;
     align-items: center;
@@ -397,9 +458,15 @@ onMounted(() => {
     &:focus-within {
       transform: translateY(-4px);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-      .rotating-plus {
-        transform: rotate(90deg);
-        color: $primary-color;
+      border-color: rgba($primary-color, 0.2);
+
+      // 当激活输入框时，ENTER 键变亮
+      .input-tip {
+        background: $primary-color;
+        color: white;
+        border-color: $primary-color;
+        box-shadow: 0 4px 0 $primary-dark;
+        transform: translateY(-2px);
       }
     }
 
@@ -408,7 +475,6 @@ onMounted(() => {
       height: 24px;
       @include flex-center;
       cursor: pointer;
-
       .rotating-plus {
         transition: all 0.5s ease;
         color: $text-gray;
@@ -429,21 +495,34 @@ onMounted(() => {
       background: transparent;
       &::placeholder {
         color: $text-gray;
-        opacity: 0.45;
+        opacity: 0.35;
       }
     }
 
+    /* --- 核心优化：物理感 ENTER 键 --- */
     .input-tip {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
       color: $text-gray;
-      opacity: 0.3;
-      padding: 4px 10px;
-      border: 1.5px solid rgba($text-gray, 0.15);
-      border-radius: 12px;
+      background: #fdfdfd;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e2e7;
+      // 模拟键帽的立体阴影
+      box-shadow: 0 3px 0 #d1d1d6;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.5px;
+      user-select: none;
+      opacity: 0.8;
+
+      &:active {
+        transform: translateY(2px); // 模拟按下感
+        box-shadow: 0 0 0 #d1d1d6;
+      }
     }
   }
 
+  /* 列表项样式 */
   .todo-item {
     display: flex;
     align-items: center;
@@ -453,7 +532,6 @@ onMounted(() => {
     border-radius: 24px;
     margin-bottom: 16px;
     transition: all 0.3s ease;
-
     &:hover {
       transform: translateY(-3px);
       box-shadow: $shadow-mid;
@@ -462,7 +540,6 @@ onMounted(() => {
         transform: translateX(0);
       }
     }
-
     .item-checkbox-wrapper {
       margin-right: 22px;
       cursor: pointer;
@@ -475,21 +552,18 @@ onMounted(() => {
         @include flex-center;
       }
     }
-
     .item-text {
       flex: 1;
       font-size: 16px;
       font-weight: 600;
       color: $text-main;
     }
-
     .item-actions {
       display: flex;
       gap: 14px;
       opacity: 0;
       transform: translateX(15px);
       transition: all 0.3s ease;
-
       .action-btn {
         padding: 4px;
         font-size: 20px;
@@ -505,11 +579,9 @@ onMounted(() => {
         }
       }
     }
-
     &.is-pending .item-checkbox {
       border: 2.5px solid $primary-color;
     }
-
     &.is-completed {
       opacity: 0.6;
       .item-text {
@@ -519,9 +591,6 @@ onMounted(() => {
       .item-checkbox {
         background: rgba($border-color, 0.2);
         border: 2.5px solid $border-color;
-        .check-mark {
-          color: $text-gray;
-        }
       }
     }
   }
@@ -545,6 +614,7 @@ onMounted(() => {
   }
 }
 
+/* 动画定义 */
 @keyframes floating {
   0%,
   100% {
