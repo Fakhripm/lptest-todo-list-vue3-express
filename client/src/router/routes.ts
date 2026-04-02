@@ -8,6 +8,7 @@ import type { RouteRecordRaw } from 'vue-router'
 // 懒加载组件，减少首屏体积
 const LoginView = () => import('@/views/login/loginIndex.vue')
 const TodoView = () => import('@/views/todo/todoIndex.vue')
+const RegisterView = () => import('@/views/register/registerIndex.vue')
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -21,6 +22,15 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       public: true,
       title: '登录',
+    },
+  },
+  {
+    path: '/register',
+    name: 'Rgister',
+    component: RegisterView,
+    meta: {
+      public: true,
+      title: '注册',
     },
   },
   {

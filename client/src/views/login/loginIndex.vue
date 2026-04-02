@@ -45,7 +45,9 @@
 
         <div class="footer-section">
           <span class="hint-text">还没有加入？</span>
-          <el-link underline="never" class="register-link">立即注册</el-link>
+          <el-link underline="never" class="register-link" @click="router.push('/register')"
+            >立即注册</el-link
+          >
         </div>
       </div>
     </el-card>

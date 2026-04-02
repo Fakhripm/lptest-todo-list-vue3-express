@@ -135,6 +135,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useTodoStore } from '@/stores/todo'
+import { getErrorMessage } from '@/utils/error'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Edit, Delete, Calendar, Right, Check, Plus, Loading } from '@element-plus/icons-vue'
 import type { Todo } from '@/types/todo'
@@ -187,14 +188,7 @@ const completionPercentage = computed(() => {
   return Math.round((completed / total) * 100)
 })
 
-// 4. 工具函数
-const getErrorMessage = (error: unknown, defaultMsg: string): string => {
-  if (error instanceof Error) return error.message
-  if (typeof error === 'string') return error
-  return defaultMsg
-}
-
-// 5. 核心业务逻辑
+// 4. 核心业务逻辑
 
 /** 添加待办 */
 const handleAddTodo = async () => {
@@ -293,7 +287,7 @@ const handleDelete = async (todo: Todo) => {
   }
 }
 
-// 6. 账户逻辑
+// 5. 账户逻辑
 const handleLogout = async () => {
   try {
     await ElMessageBox.confirm('确定退出当前账号？', '提示', {
@@ -311,7 +305,7 @@ const handleLogout = async () => {
   }
 }
 
-// 7. 生命周期
+// 6. 生命周期
 onMounted(() => {
   todoStore.fetchTodos().catch((error: unknown) => {
     ElMessage.error(getErrorMessage(error, '获取列表失败'))
@@ -460,7 +454,9 @@ $apple-bg: #f2f2f7;
       letter-spacing: -0.5px;
     }
   }
-
+  .date-text {
+    font-size: 13px;
+  }
   .logout-btn {
     @include active-push;
     padding: 8px 12px;
