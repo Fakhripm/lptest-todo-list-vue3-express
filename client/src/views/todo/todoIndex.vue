@@ -37,7 +37,9 @@
         <section class="input-section">
           <div class="fancy-input-wrapper">
             <div class="plus-icon-container" @click="handleAddTodo">
-              <el-icon :size="20" class="rotating-plus" v-loading="isSubmitting"><Plus /></el-icon>
+              <el-icon :size="20" :class="isSubmitting ? 'loading-icon' : 'rotating-plus'">
+                <component :is="isSubmitting ? Loading : Plus" />
+              </el-icon>
             </div>
             <input
               type="text"
@@ -71,6 +73,7 @@
             </div>
 
             <div class="item-text">{{ todo.title }}</div>
+
             <div class="item-actions">
               <el-button
                 link
@@ -86,6 +89,7 @@
               ></el-button>
             </div>
           </div>
+
           <div v-if="todoStore.todos.length === 0 && !todoStore.loading" class="empty-state">
             <div class="empty-icon-wrapper">
               <el-icon :size="54" class="empty-icon"><Edit /></el-icon>
@@ -104,7 +108,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useTodoStore } from '@/stores/todo'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Calendar, Right, Check, Loading } from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import type { Todo } from '@/types/todo'
 
@@ -112,29 +116,21 @@ const router = useRouter()
 const todoStore = useTodoStore()
 const userStore = useUserStore()
 
-// 输入框临时存放点
 const newTodoTitle = ref<string>('')
 const isSubmitting = ref(false)
 
-// 显示当前日期
 const currentDate = computed(() => {
   const now = new Date()
   const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-  // 拼接字符串
   return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${weekdays[now.getDay()]}`
 })
 
-// 辅助函数：安全提取错误信息
 function getErrorMessage(error: unknown, defaultMsg: string): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-  if (typeof error === 'string') {
-    return error
-  }
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
   return defaultMsg
 }
-// 添加任务
+
 async function handleAddTodo() {
   const title = newTodoTitle.value.trim()
   if (!title) {
@@ -149,28 +145,24 @@ async function handleAddTodo() {
     newTodoTitle.value = ''
     ElMessage.success('添加成功')
   } catch (error: unknown) {
-    const errorMsg = getErrorMessage(error, '添加失败')
-    ElMessage.error(errorMsg)
+    ElMessage.error(getErrorMessage(error, '添加失败'))
   } finally {
     isSubmitting.value = false
   }
 }
-// 保险 用于监听键盘事件
+
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter') {
-    handleAddTodo()
-  }
+  if (e.key === 'Enter') handleAddTodo()
 }
-// 切换任务完成状态
+
 async function handleToggle(todo: Todo) {
   try {
     await todoStore.toggleTodo(todo._id)
   } catch (error: unknown) {
-    const msg = getErrorMessage(error, '操作失败')
-    ElMessage.error(msg)
+    ElMessage.error(getErrorMessage(error, '操作失败'))
   }
 }
-// 删除任务
+
 async function handleDelete(todo: Todo) {
   try {
     await ElMessageBox.confirm(`确定要删除任务 ${todo.title} 吗？`, '风险提示', {
@@ -178,17 +170,15 @@ async function handleDelete(todo: Todo) {
       cancelButtonText: '点错了',
       type: 'warning',
       customClass: 'modern-confirm-box',
+      showClose: false,
     })
     await todoStore.removeTodo(todo._id)
     ElMessage.success('已从清单中移除')
   } catch (error: unknown) {
-    if (error !== 'cancel') {
-      ElMessage.error(getErrorMessage(error, '删除失败'))
-    }
+    if (error !== 'cancel') ElMessage.error(getErrorMessage(error, '删除失败'))
   }
 }
 
-// 编辑任务标题
 async function handleEdit(todo: Todo) {
   try {
     const { value } = await ElMessageBox.prompt('重命名灵感', '编辑内容', {
@@ -196,6 +186,7 @@ async function handleEdit(todo: Todo) {
       cancelButtonText: '取消',
       inputValue: todo.title,
       inputPlaceholder: '请输入新的灵感内容...',
+      showClose: false,
       inputValidator: (val) => {
         if (!val || !val.trim()) return '内容不能为空'
         if (val.length > 100) return '内容不能超过 100 个字'
@@ -205,18 +196,14 @@ async function handleEdit(todo: Todo) {
     })
 
     if (value && value.trim() !== todo.title) {
-      // 调用 store 中已有的 updateTitle 方法
       await todoStore.updateTitle(todo._id, value.trim())
       ElMessage.success('更新成功')
     }
   } catch (error: unknown) {
-    if (error !== 'cancel') {
-      ElMessage.error(getErrorMessage(error, '更新标题失败'))
-    }
+    if (error !== 'cancel') ElMessage.error(getErrorMessage(error, '更新标题失败'))
   }
 }
 
-//退出登录
 async function handleLogout() {
   try {
     await ElMessageBox.confirm('确定退出当前账号？', '提示', {
@@ -224,6 +211,7 @@ async function handleLogout() {
       cancelButtonText: '取消',
       type: 'info',
       customClass: 'modern-confirm-box',
+      showClose: false,
     })
     userStore.logout()
     router.push('/login')
@@ -332,7 +320,6 @@ onMounted(() => {
   .logout-btn {
     @include active-push;
     padding: 8px 12px;
-    cursor: pointer;
     .logout-text {
       font-size: 13px;
       color: $text-gray;
@@ -346,6 +333,7 @@ onMounted(() => {
       transform: translateX(-5px);
       transition: all 0.3s;
     }
+
     &:hover {
       .logout-text {
         color: $danger-color;
@@ -358,10 +346,6 @@ onMounted(() => {
       }
     }
   }
-}
-
-.status-badge-wrapper {
-  animation: badge-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .todo-content {
@@ -421,11 +405,17 @@ onMounted(() => {
 
     .plus-icon-container {
       width: 24px;
+      height: 24px;
       @include flex-center;
       cursor: pointer;
+
       .rotating-plus {
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.5s ease;
         color: $text-gray;
+      }
+      .loading-icon {
+        color: $primary-color;
+        animation: rotating 1.2s linear infinite;
       }
     }
 
@@ -440,10 +430,6 @@ onMounted(() => {
       &::placeholder {
         color: $text-gray;
         opacity: 0.45;
-      }
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
       }
     }
 
@@ -466,12 +452,15 @@ onMounted(() => {
     backdrop-filter: blur(12px);
     border-radius: 24px;
     margin-bottom: 16px;
-    border: none;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s ease;
 
     &:hover {
       transform: translateY(-3px);
       box-shadow: $shadow-mid;
+      .item-actions {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
     .item-checkbox-wrapper {
@@ -492,45 +481,33 @@ onMounted(() => {
       font-size: 16px;
       font-weight: 600;
       color: $text-main;
-      transition: color 0.3s ease;
     }
 
     .item-actions {
-      opacity: 0;
       display: flex;
       gap: 14px;
-      transform: translateX(10px);
-      transition: all 0.3s;
+      opacity: 0;
+      transform: translateX(15px);
+      transition: all 0.3s ease;
+
       .action-btn {
+        padding: 4px;
         font-size: 20px;
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        color: $text-gray;
         &:hover {
-          transform: scale(1.2) translateY(-2px);
-        }
-        &.edit {
-          color: $text-gray;
-          &:hover {
+          transform: scale(1.25);
+          &.edit {
             color: $primary-color;
           }
-        }
-        &.delete {
-          color: $text-gray;
-          &:hover {
+          &.delete {
             color: $danger-color;
           }
         }
       }
     }
 
-    &.is-pending {
-      .item-checkbox {
-        border: 2.5px solid $primary-color;
-        &:hover {
-          transform: scale(1.15);
-          border-color: color.adjust($primary-color, $lightness: -10%);
-          background: rgba($primary-color, 0.02);
-        }
-      }
+    &.is-pending .item-checkbox {
+      border: 2.5px solid $primary-color;
     }
 
     &.is-completed {
@@ -540,8 +517,8 @@ onMounted(() => {
         color: $text-gray;
       }
       .item-checkbox {
-        background: color.adjust($bg-color, $lightness: -5%);
-        border: 2.5px solid color.adjust($bg-color, $lightness: -10%);
+        background: rgba($border-color, 0.2);
+        border: 2.5px solid $border-color;
         .check-mark {
           color: $text-gray;
         }
@@ -553,8 +530,6 @@ onMounted(() => {
     text-align: center;
     padding: 80px 20px;
     .empty-icon-wrapper {
-      display: inline-block;
-      margin-bottom: 20px;
       animation: floating 3s ease-in-out infinite;
       .empty-icon {
         color: $text-gray;
@@ -570,17 +545,6 @@ onMounted(() => {
   }
 }
 
-@keyframes badge-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @keyframes floating {
   0%,
   100% {
@@ -588,6 +552,14 @@ onMounted(() => {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
