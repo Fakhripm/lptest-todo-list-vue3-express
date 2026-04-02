@@ -72,7 +72,12 @@
 
             <div class="item-text">{{ todo.title }}</div>
             <div class="item-actions">
-              <el-button link :icon="Edit" class="action-btn edit"></el-button>
+              <el-button
+                link
+                :icon="Edit"
+                class="action-btn edit"
+                @click.stop="handleEdit(todo)"
+              ></el-button>
               <el-button
                 link
                 :icon="Delete"
@@ -182,6 +187,35 @@ async function handleDelete(todo: Todo) {
     }
   }
 }
+
+// 编辑任务标题
+async function handleEdit(todo: Todo) {
+  try {
+    const { value } = await ElMessageBox.prompt('重命名灵感', '编辑内容', {
+      confirmButtonText: '保存修改',
+      cancelButtonText: '取消',
+      inputValue: todo.title,
+      inputPlaceholder: '请输入新的灵感内容...',
+      inputValidator: (val) => {
+        if (!val || !val.trim()) return '内容不能为空'
+        if (val.length > 100) return '内容不能超过 100 个字'
+        return true
+      },
+      customClass: 'modern-confirm-box',
+    })
+
+    if (value && value.trim() !== todo.title) {
+      // 调用 store 中已有的 updateTitle 方法
+      await todoStore.updateTitle(todo._id, value.trim())
+      ElMessage.success('更新成功')
+    }
+  } catch (error: unknown) {
+    if (error !== 'cancel') {
+      ElMessage.error(getErrorMessage(error, '更新标题失败'))
+    }
+  }
+}
+
 //退出登录
 async function handleLogout() {
   try {
@@ -205,8 +239,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-/* 这里不再写任何 @use，变量直接从全局拿 */
-
 .todo-wrapper {
   min-height: 100vh;
   width: 100vw;
@@ -438,13 +470,8 @@ onMounted(() => {
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     &:hover {
-      background: $card-bg;
-      transform: translateX(8px);
-      box-shadow: $shadow-soft;
-      .item-actions {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      transform: translateY(-3px);
+      box-shadow: $shadow-mid;
     }
 
     .item-checkbox-wrapper {
@@ -500,7 +527,6 @@ onMounted(() => {
         border: 2.5px solid $primary-color;
         &:hover {
           transform: scale(1.15);
-          /* 使用全局注入的 color 模块 */
           border-color: color.adjust($primary-color, $lightness: -10%);
           background: rgba($primary-color, 0.02);
         }
@@ -508,20 +534,17 @@ onMounted(() => {
     }
 
     &.is-completed {
-      opacity: 0.55;
+      opacity: 0.6;
       .item-text {
         text-decoration: line-through;
         color: $text-gray;
       }
       .item-checkbox {
-        background: #e0e0e0;
-        border: 2.5px solid #d0d0d0;
+        background: color.adjust($bg-color, $lightness: -5%);
+        border: 2.5px solid color.adjust($bg-color, $lightness: -10%);
         .check-mark {
-          color: white;
+          color: $text-gray;
         }
-      }
-      &:hover {
-        transform: none;
       }
     }
   }
@@ -566,70 +589,5 @@ onMounted(() => {
   50% {
     transform: translateY(-10px);
   }
-}
-</style>
-
-<style lang="scss">
-/* 此处也直接使用变量 */
-.modern-confirm-box {
-  --el-messagebox-width: 380px;
-  border-radius: 28px !important;
-  padding: 24px !important;
-  border: none !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(25px) saturate(180%) !important;
-  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15) !important;
-
-  .el-message-box__header {
-    .el-message-box__title {
-      font-weight: 850;
-      font-size: 20px;
-      color: #1d1d1f;
-      letter-spacing: -0.5px;
-    }
-  }
-
-  .el-message-box__content {
-    color: #424245;
-    font-size: 15px;
-    padding: 15px 0 25px;
-    line-height: 1.5;
-  }
-
-  .el-message-box__btns {
-    display: flex;
-    gap: 12px;
-    .el-button {
-      flex: 1;
-      height: 46px;
-      border-radius: 16px;
-      font-weight: 700;
-      margin-left: 0 !important;
-      &:first-child {
-        background: #f5f5f7;
-        border: none;
-        color: #86868b;
-        &:hover {
-          background: #e8e8ed;
-          color: #1d1d1f;
-        }
-      }
-      &:last-child {
-        background: #ff3b30;
-        border: none;
-        color: white;
-        &:hover {
-          background: #d70015;
-          transform: translateY(-2px);
-          box-shadow: 0 8px 15px rgba(255, 59, 48, 0.25);
-        }
-      }
-    }
-  }
-}
-
-.el-overlay {
-  backdrop-filter: blur(8px) !important;
-  background-color: rgba(0, 0, 0, 0.1) !important;
 }
 </style>

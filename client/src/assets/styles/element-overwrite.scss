@@ -1,0 +1,38 @@
+body {
+  .el-message-box.modern-confirm-box {
+    --el-messagebox-width: 360px;
+    border-radius: 32px !important;
+    padding: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+
+    .el-message-box__header {
+      padding-bottom: 8px;
+      .el-message-box__title {
+        font-weight: 850;
+        color: $text-main;
+      }
+    }
+
+    .el-message-box__content {
+      .el-input__inner {
+        &:focus {
+          background: #ffffff !important;
+          border-color: $primary-color !important;
+          box-shadow: 0 0 0 4px color.change($primary-color, $alpha: 0.15) !important;
+        }
+      }
+    }
+
+    .el-message-box__btns {
+      .el-button--primary {
+        background-color: $primary-color !important;
+        &:hover {
+          background-color: color.adjust($primary-color, $lightness: -8%) !important;
+        }
+      }
+    }
+  }
+}

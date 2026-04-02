@@ -43,7 +43,7 @@ router.put('/:id', async (req, res) => {
         const todo = await Todo.findOneAndUpdate(
             { _id: req.params.id, user: req.userId },
             updateData,
-            { new: true }
+            { returnDocument: 'after' }
         )
 
         if (!todo) return res.status(404).json({ message: '任务不存在' });

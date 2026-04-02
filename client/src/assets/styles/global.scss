@@ -24,8 +24,8 @@ a {
 }
 
 .el-button--primary {
-  --el-button-bg-color: #{$text-main} !important;
-  --el-button-border-color: #{$text-main} !important;
-  --el-button-hover-bg-color: #333 !important;
-  border-radius: $radius-base;
+  --el-button-bg-color: #{vars.$primary-color} !important;
+  --el-button-border-color: #{vars.$primary-color} !important;
+  --el-button-hover-bg-color: #{vars.$primary-dark} !important;
+  border-radius: vars.$radius-input;
 }
