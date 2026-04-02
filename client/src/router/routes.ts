@@ -1,14 +1,8 @@
-/**
- * 路由表定义
- * 只配置路径和组件映射，不加逻辑
- */
-
 import type { RouteRecordRaw } from 'vue-router'
 
-// 懒加载组件，减少首屏体积
-const LoginView = () => import('@/views/login/loginIndex.vue')
+// 统一引用容器组件
+const AuthView = () => import('@/views/auth/AuthView.vue')
 const TodoView = () => import('@/views/todo/todoIndex.vue')
-const RegisterView = () => import('@/views/register/registerIndex.vue')
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -18,29 +12,20 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
-    component: LoginView,
-    meta: {
-      public: true,
-      title: '登录',
-    },
+    component: AuthView,
+    meta: { public: true, title: '登录' },
   },
   {
     path: '/register',
-    name: 'Rgister',
-    component: RegisterView,
-    meta: {
-      public: true,
-      title: '注册',
-    },
+    name: 'Register',
+    component: AuthView,
+    meta: { public: true, title: '注册' },
   },
   {
     path: '/todo',
     name: 'Todo',
     component: TodoView,
-    meta: {
-      public: false,
-      title: '待办事项',
-    },
+    meta: { public: false, title: '待办事项' },
   },
   {
     path: '/:pathMatch(.*)*',
