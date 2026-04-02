@@ -29,9 +29,10 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         additionalData: `
-        @use "@/assets/styles/variables.scss" as *;
-        @use "@/assets/styles/mixins.scss" as *;
-      `,
+          @use "sass:color";
+          @use "@/assets/styles/variables.scss" as *;
+          @use "@/assets/styles/mixins.scss" as *;
+        `,
       },
     },
   },

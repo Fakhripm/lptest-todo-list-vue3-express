@@ -205,13 +205,12 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@use '@/assets/styles/variables.scss' as vars;
-@use '@/assets/styles/mixins.scss' as mix;
+/* 这里不再写任何 @use，变量直接从全局拿 */
 
 .todo-wrapper {
   min-height: 100vh;
   width: 100vw;
-  background-color: vars.$bg-color;
+  background-color: $bg-color;
   position: relative;
   display: flex;
   justify-content: center;
@@ -228,8 +227,8 @@ onMounted(() => {
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(vars.$text-main, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(vars.$text-main, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba($text-main, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($text-main, 0.03) 1px, transparent 1px);
   background-size: 45px 45px;
 }
 
@@ -258,27 +257,27 @@ onMounted(() => {
       background: white;
       border-radius: 50%;
       border: 1px solid rgba(0, 0, 0, 0.05);
-      @include mix.flex-center;
+      @include flex-center;
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
       .avatar-inner {
         width: 16px;
         height: 16px;
-        background: vars.$text-main;
+        background: $text-main;
         border-radius: 50%;
       }
     }
 
     &:hover .avatar-box {
       transform: scale(1.1) rotate(5deg);
-      box-shadow: vars.$shadow-soft;
+      box-shadow: $shadow-soft;
     }
 
     .user-info {
       .welcome-text {
         font-weight: 800;
         font-size: 17px;
-        color: vars.$text-main;
+        color: $text-main;
         display: block;
       }
       .date-group {
@@ -287,11 +286,11 @@ onMounted(() => {
         gap: 6px;
         .calendar-mini {
           font-size: 12px;
-          color: vars.$primary-color;
+          color: $primary-color;
         }
         .date-text {
           font-size: 12px;
-          color: vars.$text-gray;
+          color: $text-gray;
           font-weight: 500;
         }
       }
@@ -299,29 +298,29 @@ onMounted(() => {
   }
 
   .logout-btn {
-    @include mix.active-push;
+    @include active-push;
     padding: 8px 12px;
     cursor: pointer;
     .logout-text {
       font-size: 13px;
-      color: vars.$text-gray;
+      color: $text-gray;
       font-weight: 600;
       transition: all 0.3s;
     }
     .exit-icon {
       font-size: 14px;
-      color: vars.$text-gray;
+      color: $text-gray;
       opacity: 0;
       transform: translateX(-5px);
       transition: all 0.3s;
     }
     &:hover {
       .logout-text {
-        color: vars.$danger-color;
+        color: $danger-color;
         transform: translateX(-4px);
       }
       .exit-icon {
-        color: vars.$danger-color;
+        color: $danger-color;
         opacity: 1;
         transform: translateX(0);
       }
@@ -343,7 +342,7 @@ onMounted(() => {
       font-size: 48px;
       font-weight: 850;
       letter-spacing: -2.5px;
-      color: vars.$text-main;
+      color: $text-main;
       margin: 0;
     }
     .status-badge {
@@ -356,22 +355,22 @@ onMounted(() => {
       border: 1px solid rgba(0, 0, 0, 0.05);
       .count {
         font-weight: 800;
-        color: vars.$primary-color;
+        color: $primary-color;
         font-size: 14px;
       }
       .label {
         font-size: 11px;
         font-weight: 700;
-        color: vars.$text-gray;
+        color: $text-gray;
       }
     }
   }
 
   .fancy-input-wrapper {
-    background: vars.$card-bg;
+    background: $card-bg;
     padding: 18px 26px;
     border-radius: 30px;
-    box-shadow: vars.$shadow-soft;
+    box-shadow: $shadow-soft;
     display: flex;
     align-items: center;
     gap: 15px;
@@ -384,17 +383,17 @@ onMounted(() => {
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
       .rotating-plus {
         transform: rotate(90deg);
-        color: vars.$primary-color;
+        color: $primary-color;
       }
     }
 
     .plus-icon-container {
       width: 24px;
-      @include mix.flex-center;
+      @include flex-center;
       cursor: pointer;
       .rotating-plus {
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        color: vars.$text-gray;
+        color: $text-gray;
       }
     }
 
@@ -404,10 +403,10 @@ onMounted(() => {
       outline: none;
       font-size: 16px;
       font-weight: 600;
-      color: vars.$text-main;
+      color: $text-main;
       background: transparent;
       &::placeholder {
-        color: vars.$text-gray;
+        color: $text-gray;
         opacity: 0.45;
       }
       &:disabled {
@@ -419,10 +418,10 @@ onMounted(() => {
     .input-tip {
       font-size: 10px;
       font-weight: 800;
-      color: vars.$text-gray;
+      color: $text-gray;
       opacity: 0.3;
       padding: 4px 10px;
-      border: 1.5px solid rgba(vars.$text-gray, 0.15);
+      border: 1.5px solid rgba($text-gray, 0.15);
       border-radius: 12px;
     }
   }
@@ -431,7 +430,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     padding: 22px 30px;
-    background: rgba(vars.$card-bg, 0.85);
+    background: rgba($card-bg, 0.85);
     backdrop-filter: blur(12px);
     border-radius: 24px;
     margin-bottom: 16px;
@@ -439,9 +438,9 @@ onMounted(() => {
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     &:hover {
-      background: vars.$card-bg;
+      background: $card-bg;
       transform: translateX(8px);
-      box-shadow: vars.$shadow-soft;
+      box-shadow: $shadow-soft;
       .item-actions {
         opacity: 1;
         transform: translateX(0);
@@ -457,7 +456,7 @@ onMounted(() => {
         border-radius: 50%;
         background: white;
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        @include mix.flex-center;
+        @include flex-center;
       }
     }
 
@@ -465,7 +464,7 @@ onMounted(() => {
       flex: 1;
       font-size: 16px;
       font-weight: 600;
-      color: vars.$text-main;
+      color: $text-main;
       transition: color 0.3s ease;
     }
 
@@ -482,15 +481,15 @@ onMounted(() => {
           transform: scale(1.2) translateY(-2px);
         }
         &.edit {
-          color: vars.$text-gray;
+          color: $text-gray;
           &:hover {
-            color: vars.$primary-color;
+            color: $primary-color;
           }
         }
         &.delete {
-          color: vars.$text-gray;
+          color: $text-gray;
           &:hover {
-            color: vars.$danger-color;
+            color: $danger-color;
           }
         }
       }
@@ -498,11 +497,12 @@ onMounted(() => {
 
     &.is-pending {
       .item-checkbox {
-        border: 2.5px solid vars.$primary-color;
+        border: 2.5px solid $primary-color;
         &:hover {
           transform: scale(1.15);
-          border-color: darken(#409eff, 10%);
-          background: rgba(vars.$primary-color, 0.02);
+          /* 使用全局注入的 color 模块 */
+          border-color: color.adjust($primary-color, $lightness: -10%);
+          background: rgba($primary-color, 0.02);
         }
       }
     }
@@ -511,7 +511,7 @@ onMounted(() => {
       opacity: 0.55;
       .item-text {
         text-decoration: line-through;
-        color: vars.$text-gray;
+        color: $text-gray;
       }
       .item-checkbox {
         background: #e0e0e0;
@@ -534,13 +534,13 @@ onMounted(() => {
       margin-bottom: 20px;
       animation: floating 3s ease-in-out infinite;
       .empty-icon {
-        color: vars.$text-gray;
+        color: $text-gray;
         opacity: 0.3;
       }
     }
     .empty-text {
       font-size: 14px;
-      color: vars.$text-gray;
+      color: $text-gray;
       font-weight: 600;
       opacity: 0.5;
     }
@@ -570,6 +570,7 @@ onMounted(() => {
 </style>
 
 <style lang="scss">
+/* 此处也直接使用变量 */
 .modern-confirm-box {
   --el-messagebox-width: 380px;
   border-radius: 28px !important;
@@ -627,7 +628,6 @@ onMounted(() => {
   }
 }
 
-/* 覆盖底层遮罩，增加模糊感 */
 .el-overlay {
   backdrop-filter: blur(8px) !important;
   background-color: rgba(0, 0, 0, 0.1) !important;

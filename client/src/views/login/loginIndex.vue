@@ -1,125 +1,212 @@
 <template>
-  <div class="login-wrapper">
+  <div class="todo-wrapper">
     <div class="grid-overlay"></div>
 
-    <el-card class="login-card" shadow="always">
-      <div class="login-content">
-        <div class="header-section">
-          <div class="organic-logo">
-            <div class="circle-ring"></div>
-            <div class="circle-core"></div>
+    <div class="todo-container">
+      <header class="todo-header">
+        <div class="user-profile">
+          <div class="avatar-box">
+            <div class="avatar-inner"></div>
           </div>
-          <h1 class="brand-title">TodoList</h1>
-          <p class="brand-subtitle">简约日程，让生活呼吸顺畅</p>
+          <div class="user-info">
+            <span class="welcome-text">你好, {{ userStore.user?.username || 'emo' }}</span>
+            <div class="date-group">
+              <el-icon class="calendar-mini"><Calendar /></el-icon>
+              <span class="date-text">{{ currentDate }}</span>
+            </div>
+          </div>
         </div>
 
-        <el-form ref="formRef" :rules="rules" :model="form" @keyup.enter="handleLogin">
-          <el-form-item prop="username">
-            <el-input
-              v-model="form.username"
-              placeholder="请输入用户名"
-              size="large"
-              class="custom-input"
-              clearable
+        <el-button link class="logout-btn" @click="handleLogout">
+          <span class="logout-text">退出登录</span>
+          <el-icon class="exit-icon"><Right /></el-icon>
+        </el-button>
+      </header>
+
+      <main class="todo-content">
+        <section class="content-header">
+          <h2 class="page-title">今日清单</h2>
+          <div class="status-badge-wrapper">
+            <div class="status-badge">
+              <span class="count">{{ todoStore.unfinishedCount }}</span>
+              <span class="label">条待办</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="input-section">
+          <div class="fancy-input-wrapper">
+            <div class="plus-icon-container" @click="handleAddTodo">
+              <el-icon :size="20" class="rotating-plus" v-loading="isSubmitting"><Plus /></el-icon>
+            </div>
+            <input
+              type="text"
+              v-model="newTodoTitle"
+              @keydown="handleKeydown"
+              placeholder="记录新灵感 (最多100字)..."
+              class="pure-input"
+              maxlength="100"
+              :disabled="isSubmitting"
             />
-          </el-form-item>
+            <div class="input-tip">ENTER</div>
+          </div>
+        </section>
 
-          <el-form-item prop="password">
-            <el-input
-              v-model="form.password"
-              type="password"
-              placeholder="请输入密码"
-              show-password
-              size="large"
-              class="custom-input"
-              clearable
-            />
-          </el-form-item>
+        <section class="list-section">
+          <div
+            v-for="todo in todoStore.todos"
+            :key="todo._id"
+            class="todo-item"
+            :class="{
+              'is-pending': !todo.completed,
+              'is-completed': todo.completed,
+            }"
+          >
+            <div class="item-checkbox-wrapper" @click="handleToggle(todo)">
+              <div class="item-checkbox">
+                <el-icon v-if="todo.completed" class="check-mark" :size="14">
+                  <Check />
+                </el-icon>
+              </div>
+            </div>
 
-          <el-form-item class="submit-item">
-            <el-button type="primary" class="submit-btn" @click="handleLogin" :loading="loading">
-              开始今日清单
-            </el-button>
-          </el-form-item>
-        </el-form>
-
-        <div class="footer-section">
-          <span class="hint-text">还没有加入？</span>
-          <el-link underline="never" class="register-link">立即注册</el-link>
-        </div>
-      </div>
-    </el-card>
+            <div class="item-text">{{ todo.title }}</div>
+            <div class="item-actions">
+              <el-button link :icon="Edit" class="action-btn edit"></el-button>
+              <el-button
+                link
+                :icon="Delete"
+                class="action-btn delete"
+                @click.stop="handleDelete(todo)"
+              ></el-button>
+            </div>
+          </div>
+          <div v-if="todoStore.todos.length === 0 && !todoStore.loading" class="empty-state">
+            <div class="empty-icon-wrapper">
+              <el-icon :size="54" class="empty-icon"><Edit /></el-icon>
+            </div>
+            <p class="empty-text">今日暂无待办，开始你的第一条灵感吧</p>
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
+import { useTodoStore } from '@/stores/todo'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Edit, Delete, Calendar, Right, Check } from '@element-plus/icons-vue'
+import 'element-plus/dist/index.css'
+import type { Todo } from '@/types/todo'
 
 const router = useRouter()
+const todoStore = useTodoStore()
 const userStore = useUserStore()
 
-const formRef = ref<FormInstance>()
-const loading = ref(false)
-const form = reactive({
-  username: '',
-  password: '',
+const newTodoTitle = ref<string>('')
+const isSubmitting = ref(false)
+
+const currentDate = computed(() => {
+  const now = new Date()
+  const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${weekdays[now.getDay()]}`
 })
 
-const rules: FormRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, message: '用户名至少三位', trigger: 'blur' },
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少六位', trigger: 'blur' },
-  ],
+function getErrorMessage(error: unknown, defaultMsg: string): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  return defaultMsg
 }
 
-// 4. 登录逻辑
-const handleLogin = async () => {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
-
-  loading.value = true
+async function handleAddTodo() {
+  const title = newTodoTitle.value.trim()
+  if (!title) {
+    ElMessage.warning('请输入任务内容')
+    return
+  }
+  if (isSubmitting.value) return
 
   try {
-    await userStore.login({
-      username: form.username,
-      password: form.password,
-    })
-
-    ElMessage.success('欢迎回来!')
-    router.push('/todo')
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : '登录失败了, 请检查账号密码'
-    ElMessage.error(errorMessage)
+    isSubmitting.value = true
+    await todoStore.addTodo(title)
+    newTodoTitle.value = ''
+    ElMessage.success('添加成功')
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '添加失败'))
   } finally {
-    loading.value = false
+    isSubmitting.value = false
   }
 }
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') handleAddTodo()
+}
+
+async function handleToggle(todo: Todo) {
+  try {
+    await todoStore.toggleTodo(todo._id)
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '操作失败'))
+  }
+}
+
+async function handleDelete(todo: Todo) {
+  try {
+    await ElMessageBox.confirm(`确定要删除任务 ${todo.title} 吗？`, '风险提示', {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '点错了',
+      type: 'warning',
+      customClass: 'modern-confirm-box',
+    })
+    await todoStore.removeTodo(todo._id)
+    ElMessage.success('已从清单中移除')
+  } catch (error: unknown) {
+    if (error !== 'cancel') ElMessage.error(getErrorMessage(error, '删除失败'))
+  }
+}
+
+async function handleLogout() {
+  try {
+    await ElMessageBox.confirm('确定退出当前账号？', '提示', {
+      confirmButtonText: '退出',
+      cancelButtonText: '取消',
+      type: 'info',
+      customClass: 'modern-confirm-box',
+    })
+    userStore.logout()
+    router.push('/login')
+    ElMessage.success('已安全退出')
+  } catch {}
+}
+
+onMounted(() => {
+  todoStore.fetchTodos().catch((error: unknown) => {
+    ElMessage.error(getErrorMessage(error, '获取列表失败'))
+  })
+})
 </script>
 
 <style lang="scss" scoped>
-@use 'sass:color';
+/* 注意：Vite 已经自动注入了 @use "sass:color", variables 和 mixins */
 
-// 基础容器
-.login-wrapper {
-  height: 100vh;
+.todo-wrapper {
+  min-height: 100vh;
   width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: $bg-color;
   position: relative;
-  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+  font-family:
+    'SF Pro Display',
+    -apple-system,
+    sans-serif;
 }
 
-// 网格背景
 .grid-overlay {
   position: absolute;
   inset: 0;
@@ -129,166 +216,405 @@ const handleLogin = async () => {
     linear-gradient(rgba($text-main, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba($text-main, 0.03) 1px, transparent 1px);
   background-size: 45px 45px;
-  background-position: center center;
 }
 
-// 卡片样式
-.login-card {
+.todo-container {
   width: 90%;
-  max-width: 400px;
-  border-radius: $radius-card;
-  border: none;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
+  max-width: 680px;
+  padding: 60px 0;
   position: relative;
   z-index: 1;
-
-  :deep(.el-card__body) {
-    padding: 60px 45px;
-  }
 }
 
-.login-content {
-  .header-section {
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 70px;
+
+  .user-profile {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    margin-bottom: 45px;
+    gap: 16px;
 
-    .organic-logo {
-      position: relative;
-      width: 48px;
-      height: 48px;
-      margin-bottom: 20px;
+    .avatar-box {
+      width: 46px;
+      height: 46px;
+      background: white;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.05);
       @include flex-center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-      .circle-ring {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border: 3px solid transparent;
-        border-top-color: $primary-color;
-        border-right-color: rgba($primary-color, 0.3);
-        border-bottom-color: rgba($primary-color, 0.1);
-        border-left-color: rgba($primary-color, 0.6);
+      .avatar-inner {
+        width: 16px;
+        height: 16px;
+        background: $text-main;
         border-radius: 50%;
-        animation: rotating 6s linear infinite; // 使用统一的 rotating 动画
-      }
-
-      .circle-core {
-        width: 14px;
-        height: 14px;
-        background-color: $text-main;
-        border-radius: 50%;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
     }
 
-    &:hover .circle-core {
-      transform: scale(1.3);
-      background-color: $primary-color;
+    &:hover .avatar-box {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: $shadow-soft;
     }
 
-    .brand-title {
-      font-size: 32px;
-      font-weight: 850;
-      color: $text-main;
-      margin: 0;
-      letter-spacing: -1.5px;
+    .user-info {
+      .welcome-text {
+        font-weight: 800;
+        font-size: 17px;
+        color: $text-main;
+        display: block;
+      }
+      .date-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        .calendar-mini {
+          font-size: 12px;
+          color: $primary-color;
+        }
+        .date-text {
+          font-size: 12px;
+          color: $text-gray;
+          font-weight: 500;
+        }
+      }
     }
+  }
 
-    .brand-subtitle {
+  .logout-btn {
+    @include active-push;
+    padding: 8px 12px;
+    cursor: pointer;
+    .logout-text {
       font-size: 13px;
       color: $text-gray;
-      opacity: 0.7;
-      margin-top: 8px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .exit-icon {
+      font-size: 14px;
+      color: $text-gray;
+      opacity: 0;
+      transform: translateX(-5px);
+      transition: all 0.3s;
+    }
+    &:hover {
+      .logout-text {
+        color: $danger-color;
+        transform: translateX(-4px);
+      }
+      .exit-icon {
+        color: $danger-color;
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  }
+}
+
+.status-badge-wrapper {
+  animation: badge-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.todo-content {
+  .content-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 40px;
+    .page-title {
+      font-size: 48px;
+      font-weight: 850;
+      letter-spacing: -2.5px;
+      color: $text-main;
+      margin: 0;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 16px;
+      background: white;
+      border-radius: 30px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      .count {
+        font-weight: 800;
+        color: $primary-color;
+        font-size: 14px;
+      }
+      .label {
+        font-size: 11px;
+        font-weight: 700;
+        color: $text-gray;
+      }
     }
   }
 
-  .submit-item {
-    margin-top: 32px;
+  .fancy-input-wrapper {
+    background: $card-bg;
+    padding: 18px 26px;
+    border-radius: 30px;
+    box-shadow: $shadow-soft;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:focus-within {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+      .rotating-plus {
+        transform: rotate(90deg);
+        color: $primary-color;
+      }
+    }
+
+    .plus-icon-container {
+      width: 24px;
+      @include flex-center;
+      cursor: pointer;
+      .rotating-plus {
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        color: $text-gray;
+      }
+    }
+
+    .pure-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      font-weight: 600;
+      color: $text-main;
+      background: transparent;
+      &::placeholder {
+        color: $text-gray;
+        opacity: 0.45;
+      }
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .input-tip {
+      font-size: 10px;
+      font-weight: 800;
+      color: $text-gray;
+      opacity: 0.3;
+      padding: 4px 10px;
+      border: 1.5px solid rgba($text-gray, 0.15);
+      border-radius: 12px;
+    }
   }
 
-  .submit-btn {
-    width: 100%;
-    height: 54px;
-    background-color: $text-main;
+  .todo-item {
+    display: flex;
+    align-items: center;
+    padding: 22px 30px;
+    background: rgba($card-bg, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    margin-bottom: 16px;
     border: none;
-    border-radius: $radius-base;
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    @include active-push;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     &:hover {
-      background-color: color.adjust($text-main, $lightness: -12%);
-      box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.4);
-      transform: translateY(-2px);
+      background: $card-bg;
+      transform: translateX(8px);
+      box-shadow: $shadow-soft;
+      .item-actions {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
-    &.is-loading {
-      opacity: 0.7;
-      background-color: $text-main !important;
-      cursor: not-allowed;
-      transform: translateY(0);
+    .item-checkbox-wrapper {
+      margin-right: 22px;
+      cursor: pointer;
+      .item-checkbox {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: white;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        @include flex-center;
+      }
+    }
 
-      :deep(.el-icon) {
+    .item-text {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 600;
+      color: $text-main;
+      transition: color 0.3s ease;
+    }
+
+    .item-actions {
+      opacity: 0;
+      display: flex;
+      gap: 14px;
+      transform: translateX(10px);
+      transition: all 0.3s;
+      .action-btn {
         font-size: 20px;
-        color: rgba(255, 255, 255, 0.9);
-        animation: rotating 1.5s linear infinite;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        &:hover {
+          transform: scale(1.2) translateY(-2px);
+        }
+        &.edit {
+          color: $text-gray;
+          &:hover {
+            color: $primary-color;
+          }
+        }
+        &.delete {
+          color: $text-gray;
+          &:hover {
+            color: $danger-color;
+          }
+        }
+      }
+    }
+
+    &.is-pending {
+      .item-checkbox {
+        border: 2.5px solid $primary-color;
+        &:hover {
+          transform: scale(1.15);
+          border-color: color.adjust($primary-color, $lightness: -10%);
+          background: rgba($primary-color, 0.02);
+        }
+      }
+    }
+
+    &.is-completed {
+      opacity: 0.55;
+      .item-text {
+        text-decoration: line-through;
+        color: $text-gray;
+      }
+      .item-checkbox {
+        background: #e0e0e0;
+        border: 2.5px solid #d0d0d0;
+        .check-mark {
+          color: white;
+        }
+      }
+      &:hover {
+        transform: none;
       }
     }
   }
 
-  .footer-section {
-    margin-top: 35px;
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    font-size: 14px;
-
-    .hint-text {
-      color: $text-gray;
-    }
-    .register-link {
-      color: $primary-color;
-      font-weight: 600;
-      transition: opacity 0.2s;
-      &:hover {
-        opacity: 0.8;
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    .empty-icon-wrapper {
+      display: inline-block;
+      margin-bottom: 20px;
+      animation: floating 3s ease-in-out infinite;
+      .empty-icon {
+        color: $text-gray;
+        opacity: 0.3;
       }
+    }
+    .empty-text {
+      font-size: 14px;
+      color: $text-gray;
+      font-weight: 600;
+      opacity: 0.5;
     }
   }
 }
 
-@keyframes rotating {
+@keyframes badge-in {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-:deep(.el-input__wrapper) {
-  background-color: rgba($bg-color, 0.5) !important;
-  box-shadow: none !important;
-  border-radius: $radius-input;
-  padding: 10px 18px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.25s ease;
-
-  &.is-focus {
-    background-color: #fff !important;
-    border-color: $text-main !important;
-    box-shadow: 0 0 0 4px rgba($text-main, 0.05) !important;
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0);
   }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+</style>
 
-  .el-input__inner {
-    &::placeholder {
-      font-size: 14px;
-      color: #bbb;
+<style lang="scss">
+/* 全局样式也同样享受全局变量注入 */
+.modern-confirm-box {
+  --el-messagebox-width: 380px;
+  border-radius: 28px !important;
+  padding: 24px !important;
+  border: none !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15) !important;
+
+  .el-message-box__header {
+    .el-message-box__title {
+      font-weight: 850;
+      font-size: 20px;
+      color: #1d1d1f;
+      letter-spacing: -0.5px;
     }
   }
+
+  .el-message-box__content {
+    color: #424245;
+    font-size: 15px;
+    padding: 15px 0 25px;
+    line-height: 1.5;
+  }
+
+  .el-message-box__btns {
+    display: flex;
+    gap: 12px;
+    .el-button {
+      flex: 1;
+      height: 46px;
+      border-radius: 16px;
+      font-weight: 700;
+      margin-left: 0 !important;
+      &:first-child {
+        background: #f5f5f7;
+        border: none;
+        color: #86868b;
+        &:hover {
+          background: #e8e8ed;
+          color: #1d1d1f;
+        }
+      }
+      &:last-child {
+        background: #ff3b30;
+        border: none;
+        color: white;
+        &:hover {
+          background: #d70015;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 15px rgba(255, 59, 48, 0.25);
+        }
+      }
+    }
+  }
+}
+
+.el-overlay {
+  backdrop-filter: blur(8px) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
 }
 </style>
