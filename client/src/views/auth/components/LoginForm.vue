@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { getErrorMessage } from '@/utils/error' // 确保路径正确
+import { getErrorMessage } from '@/utils/error'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -15,33 +15,28 @@ const form = reactive({
   username: '',
   password: '',
 })
-
-// 增强校验规则：与之前保持一致
 const rules: FormRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, message: '用户名至少三位', trigger: 'blur' },
+    { min: 6, message: '用户名至少6位', trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少六位', trigger: 'blur' },
+    { min: 6, message: '密码至少6位', trigger: 'blur' },
   ],
 }
 
 const handleLogin = async () => {
   if (!formRef.value) return
 
-  // 1. 执行表单校验
+  // 1. 表单预校验
   try {
     await formRef.value.validate()
-    // 校验通过，继续往下走
   } catch {
-    // 核心修改：去掉 catch 里的 err 变量，因为 Element 校验失败会自动在 UI 提示
-    // 我们不需要在这里处理 err 对象，直接拦截并跳出函数即可
     return
   }
 
-  // 2. 执行登录逻辑
+  // 2. 执行登录
   loading.value = true
   try {
     await userStore.login({
@@ -51,10 +46,8 @@ const handleLogin = async () => {
     ElMessage.success('欢迎回来')
     router.push('/todo')
   } catch (error: unknown) {
-    if (error !== 'cancel') {
-      // 核心：这里才是真正需要 getErrorMessage 捕获后端返回（如 401）的地方
-      ElMessage.error(getErrorMessage(error, '登录失败，请检查账号密码'))
-    }
+    const finalMsg = getErrorMessage(error, '登录失败，请检查账号密码')
+    ElMessage.error(finalMsg)
   } finally {
     loading.value = false
   }
@@ -76,7 +69,7 @@ const handleLogin = async () => {
       <el-form-item prop="username" class="stagger-1">
         <el-input
           v-model="form.username"
-          placeholder="用户名"
+          placeholder="用户名 (至少6位)"
           size="large"
           class="custom-input"
           clearable
@@ -87,7 +80,7 @@ const handleLogin = async () => {
         <el-input
           v-model="form.password"
           type="password"
-          placeholder="密码"
+          placeholder="密码 (至少6位)"
           show-password
           size="large"
           class="custom-input"
@@ -192,7 +185,6 @@ const handleLogin = async () => {
   }
 }
 
-// 动画逻辑
 .stagger-1 {
   animation: slideUp 0.5s ease forwards 0.1s;
   opacity: 0;

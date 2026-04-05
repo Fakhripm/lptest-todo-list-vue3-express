@@ -15,7 +15,7 @@ const form = reactive({
   confirmPassword: '',
 })
 
-// 校验逻辑：两次密码是否一致
+// 修复 eslint 的 any 报错：将 _rule 类型设为 unknown
 const validateConfirmPassword = (
   _rule: unknown,
   value: string,
@@ -28,10 +28,11 @@ const validateConfirmPassword = (
   }
 }
 
+// 注册校验规则
 const rules: FormRules = {
   username: [
     { required: true, message: '请设置用户名', trigger: 'blur' },
-    { min: 3, message: '用户名至少3位', trigger: 'blur' },
+    { min: 6, message: '用户名至少6位', trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请设置密码', trigger: 'blur' },
@@ -46,29 +47,26 @@ const rules: FormRules = {
 const handleRegister = async () => {
   if (!formRef.value) return
 
-  // 1. 执行前端校验 (解决 ESLint unused-vars 报错)
+  // 1. 纯前端表单格式校验
   try {
     await formRef.value.validate()
   } catch {
-    // 校验不通过时，UI会自动显示报错，此处直接拦截不执行后续逻辑
     return
   }
 
-  // 2. 发起注册请求
+  // 2. 提交注册请求
   loading.value = true
   try {
     await registerApi({
       username: form.username,
       password: form.password,
     })
-
-    ElMessage.success('账号创建成功')
-    // 成功后通知父组件切回登录界面
+    ElMessage.success('账号创建成功，请登录')
     emit('success')
   } catch (error: unknown) {
     if (error !== 'cancel') {
-      // 核心：使用工具函数捕获后端具体的报错（如：用户名已存在）
-      ElMessage.error(getErrorMessage(error, '注册失败，请稍后再试'))
+      const finalMsg = getErrorMessage(error, '注册失败，请稍后再试')
+      ElMessage.error(finalMsg)
     }
   } finally {
     loading.value = false
@@ -79,19 +77,15 @@ const handleRegister = async () => {
 <template>
   <div class="form-main">
     <div class="header-section">
-      <div class="organic-logo">
-        <div class="circle-ring"></div>
-        <div class="circle-core"></div>
-      </div>
-      <h1 class="brand-title">加入 TodoList</h1>
-      <p class="brand-subtitle">开启高效、轻盈的日程管理之旅</p>
+      <h1 class="brand-title">开启旅程</h1>
+      <p class="brand-subtitle">只需几秒，建立你的专属清单</p>
     </div>
 
     <el-form ref="formRef" :model="form" :rules="rules" @keyup.enter="handleRegister">
       <el-form-item prop="username" class="stagger-1">
         <el-input
           v-model="form.username"
-          placeholder="设置用户名 (至少3位)"
+          placeholder="设置用户名 (至少6位)"
           size="large"
           class="custom-input"
           clearable
@@ -124,7 +118,7 @@ const handleRegister = async () => {
 
       <el-form-item class="submit-item stagger-4">
         <el-button type="primary" class="submit-btn" @click="handleRegister" :loading="loading">
-          {{ loading ? '正在创建账号...' : '立即注册' }}
+          {{ loading ? '正在创建...' : '立即加入' }}
         </el-button>
       </el-form-item>
     </el-form>
@@ -141,41 +135,11 @@ const handleRegister = async () => {
 .header-section {
   text-align: center;
   margin-bottom: 35px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  .organic-logo {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 20px;
-    @include flex-center;
-
-    .circle-ring {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border: 3px solid transparent;
-      border-top-color: $primary-color;
-      border-right-color: rgba($primary-color, 0.3);
-      border-radius: 50%;
-      animation: rotating 6s linear infinite;
-    }
-    .circle-core {
-      width: 12px;
-      height: 12px;
-      background-color: $text-main;
-      border-radius: 50%;
-    }
-  }
-
   .brand-title {
     font-size: 28px;
     font-weight: 800;
-    color: $text-main;
     margin-bottom: 8px;
-    letter-spacing: -0.5px;
+    color: $text-main;
   }
   .brand-subtitle {
     color: $text-gray;
@@ -208,18 +172,13 @@ const handleRegister = async () => {
     border: 1.5px solid transparent !important;
     border-radius: $radius-input;
     height: 52px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
     &.is-focus {
       border-color: $primary-color !important;
       background-color: #fff !important;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba($primary-color, 0.12) !important;
     }
   }
 }
 
-// 交错入场动画
 .stagger-1 {
   animation: slideUp 0.5s ease forwards 0.1s;
   opacity: 0;
@@ -245,15 +204,6 @@ const handleRegister = async () => {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes rotating {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 </style>
