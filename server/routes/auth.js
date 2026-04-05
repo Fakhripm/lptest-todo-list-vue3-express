@@ -12,13 +12,16 @@ router.post('/register', async (req, res) => {
         if (!username || !password) {
             return res.status(400).json({ message: '用户名或密码不能为空' })
         }
+        if (username.trim().length < 6 || password.length < 6) {
+            return res.status(400).json({ message: '用户名和密码至少需要6位' })
+        }
 
-        const existingUser = await User.findOne({ username })
+        const existingUser = await User.findOne({ username: username.trim() })
         if (existingUser) {
             return res.status(400).json({ message: '用户名已存在' })
         }
 
-        const user = new User({ username, password })
+        const user = new User({ username: username.trim(), password })
         await user.save()
 
         res.status(201).json({ message: '注册成功' })
@@ -36,7 +39,8 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: '用户名或密码不能为空' })
         }
 
-        const user = await User.findOne({ username })
+        // 优化：使用 trim 避免空格干扰
+        const user = await User.findOne({ username: username.trim() })
         if (!user) {
             return res.status(400).json({ message: '用户名不存在' })
         }

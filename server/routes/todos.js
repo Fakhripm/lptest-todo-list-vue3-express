@@ -11,7 +11,8 @@ router.get('/', async (req, res) => {
         const todos = await Todo.find({ user: req.userId }).sort({ createdAt: -1 })
         res.json(todos)
     } catch (err) {
-        res.status(500).json({ messgae: '获取失败', error: err.message })
+        // 修正拼写 messgae -> message
+        res.status(500).json({ message: '获取失败', error: err.message })
     }
 })
 
@@ -20,7 +21,7 @@ router.post('/', async (req, res) => {
     try {
         const { title } = req.body
         if (!title?.trim()) {
-            res.status(400).json({ messgae: '内容不能为空' })
+            res.status(400).json({ message: '内容不能为空' })
             return
         }
 
@@ -28,7 +29,7 @@ router.post('/', async (req, res) => {
         await todo.save()
         res.status(201).json(todo)
     } catch (err) {
-        res.status(500).json({ messgae: '创建失败', error: err.message })
+        res.status(500).json({ message: '创建失败', error: err.message })
     }
 })
 
@@ -37,7 +38,14 @@ router.put('/:id', async (req, res) => {
     try {
         const { title, completed } = req.body
         const updateData = {}
-        if (title !== undefined) updateData.title = title.trim()
+        if (title !== undefined) {
+            const trimmedTitle = title.trim()
+            if (!trimmedTitle) {
+                return res.status(400).json({ message: '任务内容不能为空' })
+            }
+            updateData.title = trimmedTitle
+        }
+
         if (completed !== undefined) updateData.completed = completed
 
         const todo = await Todo.findOneAndUpdate(
