@@ -1,33 +1,74 @@
-
-
-# Todo List Vue3-Express
+# Todo List Vue3-Express 📝
 
 [Repository URL](https://gitee.com/its-emo/todo-list-vue3-express)
 
-一个使用 Vue 3 + Express + MongoDB 构建的 TODO 应用。
+Vue3 + TypeScript + Express + MongoDB 全栈TODO应用 | 前端能力落地 + Node.js接口封装实战
 
-## 项目介绍
+## 一、核心亮点 ✨（个人能力展示）
 
-这是一个前后端分离的全栈 TODO 应用，采用 Vue 3 作为前端框架，Express.js 作为后端框架，MongoDB 作为数据库。支持用户的注册登录、任务的增删改查等核心功能。
+聚焦前端核心能力落地与Node.js入门实践，兼顾视觉体验与代码规范，体现前端开发者的技术沉淀与全栈思维。
 
-## 技术栈
+- **前端能力** 🚀：精通Vue3组合式API，规范运用TypeScript类型约束、Axios接口封装、Vue Router权限控制，代码可维护性强
 
-### 前端
-- **Vue 3** - 渐进式前端框架
-- **TypeScript** - 类型安全的 JavaScript 超集
-- **Pinia** - 轻量级状态管理
-- **Vue Router** - 路由管理
-- **Element Plus** - UI 组件库
-- **Vite** - 现代构建工具
+- **后端实践** 🛠️：快速上手Express，掌握后端分层架构设计与接口封装，理解RESTful规范，实现前后端数据联动
 
-### 后端
-- **Express.js** - Node.js Web 框架
-- **MongoDB** - NoSQL 数据库
-- **JWT** - JSON Web Token 认证
+- **视觉体验** 🎨：基于Element Plus搭建美观界面，响应式适配多设备，交互流畅，搭配清晰视觉设计（附页面截图）
 
-## 项目结构
+- **规范落地** 📋：严格遵循前端工程化规范，模块化拆分、类型安全、接口统一，后端架构分层清晰，可复用性高
 
-```
+### 页面视觉展示 📸
+
+简洁美观的界面设计，兼顾实用性与视觉体验，以下为核心页面截图：
+
+**登录页面**
+
+![Image](./docs/images/登录页.png)
+
+**TODO任务页面**
+
+![Image](./docs/images/主页.png)
+
+## 二、架构设计 🏗️
+
+### 整体架构图
+
+### ![Image](./docs/images/架构图.png)
+
+## 三、技术栈选型 🔧
+
+### 前端技术栈 💻
+
+- **Vue 3**：^3.5.30
+
+- **TypeScript**：~5.9.3
+
+- **Pinia**：^3.0.4
+
+- **Vue Router**：^5.0.3
+
+- **Element Plus**：^2.13.6
+
+- **Vite**：^7.3.1
+
+- **Axios**：^1.13.6
+
+### 后端技术栈 🚀
+
+- **Express.js**：^5.2.1
+
+- **MongoDB**：配合 Mongoose ^9.3.2
+
+- **JWT**：jsonwebtoken ^9.0.3
+
+- **dotenv**：^17.3.1
+
+- **cors**：^2.8.6
+
+- **bcryptjs**：^3.0.3
+
+## 四、项目结构 📂
+
+```plain text
 todo-project/
 ├── client/                    # 前端代码
 │   ├── src/
@@ -56,87 +97,90 @@ todo-project/
 │   ├── server.js             # 服务器入口
 │   └── package.json          # 后端依赖配置
 │
-└── README.md                 # 项目说明文档
+├── docs/                     # README资源图片
+│   └── images/
+│       ├── 登录页.png
+│       ├── 架构图.png
+│       └── 主页.png
+│
+└── README.md                 # 项目说明文
 ```
 
-## 功能特性
+## 五、核心技术细节 🔍
 
-- 用户注册和登录
-- JWT 令牌认证
-- 任务的增加、删除、修改、查询
-- 任务状态管理
-- 响应式设计
-- 完善的错误处理和提示
+### 1. 前端核心实现
 
-## 快速开始
+- **TypeScript 类型规范**：杜绝any类型，定义核心类型（Todo、User），规范接口请求/响应格式，保障类型安全。
 
-### 前端安装
+- **Axios 接口封装**：统一请求/响应拦截，模块化管理接口，配合TS类型，调用更规范、更安全。
+
+- **Vue Router 权限控制**：全局路由守卫，判断登录状态，实现页面访问权限管控，路由懒加载优化性能。
+
+### 2. 后端核心实现
+
+- **分层架构设计**：路由层、中间件层、数据模型层、工具层、配置层，职责清晰，降低耦合。
+
+- **接口封装规范**：遵循RESTful规范，统一响应格式，模块化路由，中间件复用（认证、错误处理）。
+
+- **JWT 认证实现**：自定义认证中间件，生成/验证token，保障接口安全，实现用户身份校验。
+
+## 六、功能特性 📋
+
+- 🔐 账号认证：注册/登录，JWT令牌验证，安全可靠
+
+- 📝 任务管理：增删改查、状态同步，操作流畅
+
+- 🎨 视觉体验：响应式设计，适配多设备，交互友好
+
+- 📊 类型安全：TS严格约束，减少开发错误
+
+- 🔧 规范可扩展：前后端代码规范，便于后续功能迭代
+
+## 七、快速开始 🚀
+
+### 前端启动 💻
 
 ```bash
 # 进入前端目录
 cd client
-
 # 安装依赖
 npm install
-
-# 启动开发服务器
+# 启动前端开发服务器
 npm run dev
 ```
 
-### 后端安装
+### 后端启动 🛠️
 
 ```bash
 # 进入后端目录
 cd server
-
 # 安装依赖
 npm install
-
 # 复制环境变量配置文件
 cp .env.example .env
-
-# 启动服务器
-npm start
+# 启动后端开发服务器（热更新）
+npm run dev
 ```
 
-## 环境变量配置
+### 环境配置 ⚙️
 
-### 前端 (.env)
+修改后端 `.env` 文件，配置MongoDB连接地址，确保数据库正常启动即可。
 
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
+## 八、个人总结 📊
 
-### 后端 (.env)
+本项目是我前端技术沉淀与Node.js入门实践的核心成果，重点锻炼了三大能力：
 
-```env
-MONGO_URI=mongodb://localhost:27017/todo-app
-JWT_SECRET=your-secret-key
-PORT=3000
-```
+- 前端层面：熟练运用Vue3生态，规范落地TS类型约束、接口封装、路由权限，提升代码规范性与可维护性；
 
-## 开发命令
+- 后端层面：快速上手Express，理解后端分层架构设计，掌握接口封装与RESTful规范，实现前后端联动；
 
-### 前端
+- 全栈思维：学会前后端数据交互、认证逻辑实现，培养从需求到落地的全流程开发思维，为后续全栈开发打下基础。
 
-| 命令 | 说明 |
-|------|------|
-| `npm run dev` | 启动开发服务器 |
-| `npm run build` | 构建生产版本 |
-| `npm run preview` | 预览生产版本 |
-| `npm run lint` | 代码检查 |
+## 九、备注 📌
 
-### 后端
+1. 本地启动需确保MongoDB正常运行，环境变量配置符合本地环境；
 
-| 命令 | 说明 |
-|------|------|
-| `npm start` | 启动生产服务器 |
-| `npm run dev` | 启动开发服务器 |
+2. 架构图、流程图可根据实际项目需求微调；
 
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 许可证
-
-[MIT](https://gitee.com/its-emo/todo-list-vue3-express/blob/master/LICENSE)
+3. 后续可扩展任务分类、数据可视化等功能，进一步完善全栈能力。
+    > （注：文档部分内容可能由 AI 生成）
