@@ -74,7 +74,7 @@
               </span>
             </div>
 
-            <div class="input-tip">Enter</div>
+            <div class="input-tip" @click="handleAddTodo" style="cursor: pointer">Enter</div>
           </div>
         </section>
 
