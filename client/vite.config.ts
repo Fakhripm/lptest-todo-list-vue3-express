@@ -19,6 +19,11 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  // 添加 server 配置以允许 cpolar 穿透访问
+  server: {
+    host: true, // 监听所有 IP 地址（包括局域网 IP）
+    allowedHosts: true, // 允许所有域名访问，解决 Blocked host 报错
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
