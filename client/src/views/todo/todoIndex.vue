@@ -174,10 +174,8 @@ const currentDate = computed(() => {
   const now = new Date()
   const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
   const year = now.getFullYear()
-  const month = String(now.getMonth() + 1)
-    .padStart(2, '0')
-    .slice(-2)
-  const date = String(now.getDate()).padStart(2, '0').slice(-2)
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const date = String(now.getDate()).padStart(2, '0')
   const day = weekdays[now.getDay()]
   return `${year}年${month}月${date}日 · ${day}`
 })
@@ -266,7 +264,8 @@ const handleEdit = async (todo: Todo) => {
       ElMessage.success('更新成功')
     }
   } catch (error: unknown) {
-    if (error !== 'cancel') ElMessage.error(getErrorMessage(error, '更新标题失败'))
+    if (error !== 'cancel' && error !== 'close')
+      ElMessage.error(getErrorMessage(error, '更新标题失败'))
   }
 }
 
@@ -283,7 +282,7 @@ const handleDelete = async (todo: Todo) => {
     await todoStore.removeTodo(todo._id)
     ElMessage.success('已从清单中移除')
   } catch (error: unknown) {
-    if (error !== 'cancel') ElMessage.error(getErrorMessage(error, '删除失败'))
+    if (error !== 'cancel' && error !== 'close') ElMessage.error(getErrorMessage(error, '删除失败'))
   }
 }
 

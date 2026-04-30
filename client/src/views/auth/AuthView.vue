@@ -49,11 +49,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import LoginForm from './components/LoginForm.vue'
 import RegisterForm from './components/RegisterForm.vue'
 
-const isLogin = ref(true)
+const route = useRoute()
+const isLogin = ref(route.path !== '/register')
+
+watch(
+  () => route.path,
+  (path) => {
+    isLogin.value = path !== '/register'
+  },
+)
 </script>
 
 <style lang="scss" scoped>

@@ -28,7 +28,8 @@ function remove(key: string): void {
 }
 
 function clear(): void {
-  localStorage.clear()
+  remove(STORAGE_KEY.TOKEN)
+  remove(STORAGE_KEY.USER)
 }
 
 export const storage = {

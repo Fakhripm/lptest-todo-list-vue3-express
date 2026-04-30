@@ -38,22 +38,11 @@ export const useUserStore = defineStore('user', () => {
     storage.clear()
   }
 
-  function init(): void {
-    const storedToken = storage.getToken()
-    const storedUser = storage.getUser()
-
-    if (storedToken && storedUser) {
-      token.value = storedToken
-      user.value = storedUser
-    }
-  }
-
   return {
     token,
     user,
     isLoggedIn,
     login,
     logout,
-    init,
   }
 })
