@@ -64,10 +64,8 @@ const handleRegister = async () => {
     ElMessage.success('账号创建成功，请登录')
     emit('success')
   } catch (error: unknown) {
-    if (error !== 'cancel') {
-      const finalMsg = getErrorMessage(error, '注册失败，请稍后再试')
-      ElMessage.error(finalMsg)
-    }
+    const finalMsg = getErrorMessage(error, '注册失败，请稍后再试')
+    ElMessage.error(finalMsg)
   } finally {
     loading.value = false
   }

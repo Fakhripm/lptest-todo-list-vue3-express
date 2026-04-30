@@ -49,12 +49,9 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Token 过期或无效：清理本地存储并提示
           storage.clear()
-          // 只有 401 这种全局性质的错误建议在拦截器处理，
-          // 其他业务错误（如密码错误、用户不存在）交给组件处理
           ElMessage.warning('登录已过期，请重新登录')
-          // 如果需要，可以在这里执行路由跳转：window.location.href = '/login'
+          window.location.href = '/login'
           break
 
         case 403:

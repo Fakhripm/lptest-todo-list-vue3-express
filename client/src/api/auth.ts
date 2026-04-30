@@ -7,15 +7,13 @@ import type { LoginParams, LoginResult } from '@/types/user'
 
 // 登录
 export function login(params: LoginParams): Promise<LoginResult> {
-  return api.post('auth/login', params)
+  return api.post('/auth/login', params)
 }
 
-// 注册
 export function register(params: LoginParams): Promise<{ message: string }> {
   return api.post('/auth/register', params)
 }
 
-// 获取当前用户信息
 export function getCurrentUser(): Promise<import('@/types/user').User> {
-  return api.get('auth/me')
+  return api.get('/auth/me')
 }
