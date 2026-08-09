@@ -79,44 +79,50 @@
         </section>
 
         <section class="list-section">
-          <transition-group name="list" tag="div" class="todo-list-wrapper">
-            <div
-              v-for="todo in todoStore.todos"
-              :key="todo._id"
-              class="todo-item"
-              :class="{
-                'is-pending': !todo.completed,
-                'is-completed': todo.completed,
-              }"
-            >
-              <div class="item-checkbox-wrapper" @click="handleToggle(todo)">
-                <div class="item-checkbox">
-                  <el-icon v-if="todo.completed" class="check-mark" :size="14">
-                    <Check />
-                  </el-icon>
+          <draggable
+            v-model="todoStore.todos"
+            group="tasks"
+            @end="onDragEnd"
+            class="todo-list-wrapper"
+            item-key="_id"
+          >
+            <template #item="{ element: todo }">
+              <div
+                class="todo-item"
+                :class="{
+                  'is-pending': !todo.completed,
+                  'is-completed': todo.completed,
+                }"
+              >
+                <div class="item-checkbox-wrapper" @click="handleToggle(todo)">
+                  <div class="item-checkbox">
+                    <el-icon v-if="todo.completed" class="check-mark" :size="14">
+                      <Check />
+                    </el-icon>
+                  </div>
+                </div>
+
+                <div class="item-text" @dblclick="handleEdit(todo)">
+                  {{ todo.title }}
+                </div>
+
+                <div class="item-actions">
+                  <el-button
+                    link
+                    :icon="Edit"
+                    class="action-btn edit"
+                    @click.stop="handleEdit(todo)"
+                  ></el-button>
+                  <el-button
+                    link
+                    :icon="Delete"
+                    class="action-btn delete"
+                    @click.stop="handleDelete(todo)"
+                  ></el-button>
                 </div>
               </div>
-
-              <div class="item-text" @dblclick="handleEdit(todo)">
-                {{ todo.title }}
-              </div>
-
-              <div class="item-actions">
-                <el-button
-                  link
-                  :icon="Edit"
-                  class="action-btn edit"
-                  @click.stop="handleEdit(todo)"
-                ></el-button>
-                <el-button
-                  link
-                  :icon="Delete"
-                  class="action-btn delete"
-                  @click.stop="handleDelete(todo)"
-                ></el-button>
-              </div>
-            </div>
-          </transition-group>
+            </template>
+          </draggable>
 
           <div v-if="todoStore.todos.length === 0 && !todoStore.loading" class="empty-state">
             <div class="empty-icon-wrapper">
@@ -138,6 +144,7 @@ import { useTodoStore } from '@/stores/todo'
 import { getErrorMessage } from '@/utils/error'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Edit, Delete, Calendar, Right, Check, Plus, Loading } from '@element-plus/icons-vue'
+import draggable from 'vuedraggable'
 import type { Todo } from '@/types/todo'
 import 'element-plus/dist/index.css'
 
@@ -284,6 +291,11 @@ const handleDelete = async (todo: Todo) => {
   } catch (error: unknown) {
     if (error !== 'cancel' && error !== 'close') ElMessage.error(getErrorMessage(error, '删除失败'))
   }
+}
+
+/** 拖拽完成事件 */
+const onDragEnd = (event: unknown) => {
+  console.log('拖拽完成', event)
 }
 
 // 5. 账户逻辑

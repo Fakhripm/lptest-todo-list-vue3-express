@@ -9,7 +9,7 @@ import { ElMessage } from 'element-plus'
 // 创建实例
 const api = axios.create({
   // 优先读取环境变量，否则使用本地默认地址
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
