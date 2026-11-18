@@ -27,6 +27,7 @@
     "prettier": "^3.8.1"
   },
   "overrides": {
+    "proxy-addr": "2.0.8",
     "path-to-regexp": "8.4.0",
     "body-parser": "2.4.0"
   }
