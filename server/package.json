@@ -25,5 +25,8 @@
     "eslint-config-prettier": "^10.1.8",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.1"
+  },
+  "overrides": {
+    "body-parser": "2.4.0"
   }
 }
